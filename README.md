@@ -2,6 +2,13 @@
 STC15物联网核心板-硬件代码;欢迎交流：QQ群：630017549，个人微信：fairycloud2035
 
 ## 示例教程
+
+### 实物图片
+![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo1.png)
+![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo2.png)
+![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo3.png)
+
+
 ### 实物演示
 [【【STC15物联网核心板，小程序远程控制-哔哩哔哩】](https://b23.tv/LC0sZ2T)
 
@@ -20,15 +27,19 @@ FairyCloud_STC15BD_PUBLIC/code/config.h
 
 ### 配置文件说明
 1.你的设备CID，17位设备编码
+
 unsigned char SRCCID[] = {"SXXXXXXXXXXXXXXXX"};
 
 2.填写你的WiFi名称和密码，示例的WiFi名称 Fariy    密码 qwerty123
+
 unsigned char netConfig[] = "AT+CWJAP=\"Fariy\",\"qwerty123\"\r\n\0";
 
 3.填写32位openid，平台管理员直接提供给你！
+
 unsigned char SRCOPENID[] = {"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
 
 4.填写服务器的IP和端口，平台管理员直接提供给你！
+
 unsigned char TcpServer[] = "AT+CIPSTART=\"TCP\",\"xxxxxxxxxxxxxxxxx\",xxxxx\r\n\0";
 unsigned char SaveTcpServer[] = "AT+SAVETRANSLINK=1,\"xxxxxxxxxxxxxxxxx\",xxxxx,\"TCP\"\r\n\0";
 
