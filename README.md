@@ -3,18 +3,22 @@ STC15物联网核心板-硬件代码;欢迎交流：QQ群：630017549，个人�
 
 ## 示例教程
 ### 实物演示
-【STC15物联网核心板，小程序远程控制-哔哩哔哩】 https://b23.tv/LC0sZ2T
+[【【STC15物联网核心板，小程序远程控制-哔哩哔哩】](https://b23.tv/LC0sZ2T)
 
 ### 说明文档
-https://gv9jqt8gpcb.feishu.cn/docx/VRTfdDqVZoiFHJxuQq2cCiFmnFc?from=from_copylink
+[【外部】精灵物联网各项目汇总](https://gv9jqt8gpcb.feishu.cn/docx/DAJGdExvZoZBA3xuAogc53ohnxg?from=from_copylink)
+
 
 ## 代码说明
 ### 代码目录
 FairyCloud_STC15BD_PUBLIC/code/
+
+
 ### 配置文件目录
 FairyCloud_STC15BD_PUBLIC/code/config.h
-### 配置文件说明
 
+
+### 配置文件说明
 1.你的设备CID，17位设备编码
 unsigned char SRCCID[] = {"SXXXXXXXXXXXXXXXX"};
 
@@ -34,5 +38,6 @@ unsigned char SaveTcpServer[] = "AT+SAVETRANSLINK=1,\"xxxxxxxxxxxxxxxxx\",xxxxx,
 
 ### 许可协议
 许可协议 AGPL3.0协议
+
 ### 软著证书
 ![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/%E7%B2%BE%E7%81%B5%E7%89%A9%E8%81%94%E7%BD%91%E5%B9%B3%E5%8F%B0%E7%89%88%E6%9D%83.png)
