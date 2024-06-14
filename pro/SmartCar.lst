@@ -1,0 +1,960 @@
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SMARTCAR
+OBJECT MODULE PLACED IN ..\hex\SmartCar.obj
+COMPILER INVOKED BY: E:\keil_mdk\C51\BIN\C51.EXE ..\code\SmartCar.c LARGE OPTIMIZE(8,SPEED) PRINT(.\SmartCar.lst) TABS(2
+                    -) OBJECT(..\hex\SmartCar.obj)
+
+line level    source
+
+   1          /*---------------------------------------------------------------------*/
+   2          /* --- STC MCU Limited ------------------------------------------------*/
+   3          /* --- STC15W4K58S4 ÏµÁÐ ¶¨Ê±Æ÷1ÓÃ×÷´®¿Ú1µÄ²¨ÌØÂÊ·¢ÉúÆ÷¾ÙÀý------------*/
+   4          /* --- Mobile: (86)13922805190 ----------------------------------------*/
+   5          /* --- Fax: 86-0513-55012956,55012947,55012969 ------------------------*/
+   6          /* --- Tel: 86-0513-55012928,55012929,55012966-------------------------*/
+   7          /* --- Web: www.STCMCU.com --------------------------------------------*/
+   8          /* --- Web: www.GXWMCU.com --------------------------------------------*/
+   9          /* Èç¹ûÒªÔÚ³ÌÐòÖÐÊ¹ÓÃ´Ë´úÂë,ÇëÔÚ³ÌÐòÖÐ×¢Ã÷Ê¹ÓÃÁËSTCµÄ×ÊÁÏ¼°³ÌÐò        */
+  10          /* Èç¹ûÒªÔÚÎÄÕÂÖÐÓ¦ÓÃ´Ë´úÂë,ÇëÔÚÎÄÕÂÖÐ×¢Ã÷Ê¹ÓÃÁËSTCµÄ×ÊÁÏ¼°³ÌÐò        */
+  11          /*---------------------------------------------------------------------*/
+  12          
+  13          
+  14          
+  15          
+  16          /* ----------------------------------------- ÖØÒªËµÃ÷ ----------------------------------------------------
+             --------------*/
+  17          
+  18          /*--1.¡¶¾«ÁéÎïÁªÍø¡·Î¢ÐÅ¶©ÔÄºÅÎÄÕÂ¿ÉÄÜ²»ÊÇ×îÐÂµÄ£¬´úÂë²ÅÊÇ×îÐÂµÄ------------------------------------------
+             --------------*/
+  19          /*--2.P2^5ÊÇLEDÌ¨µÆ------------------------------------------------------------*/
+  20          /*--3.12864ÏÔÊ¾ÆÁµÄÒý½Å¶ÔÓ¦¹ØÏµ //sbit SCL=P4^1; ´®ÐÐÊ±ÖÓ  //sbit SDA=P4^2; ´®ÐÐÊý¾Ý---ÔÚÍ·ÎÄ¼þL112864,HÖÐ
+             -ÐÞ¸Ä---------*/
+  21          /*--4.µ¥Æ¬»úÆô¶¯£ºµ¥Æ¬»úÆô¶¯==¡·À­È¡·þÎñÆ÷Ê±¼ä==¡·OPENIDÈÏÖ¤==¡·½¨Á¢Á´½Ó==¡·Õý³£Í¨ÐÅ----------------------
+             --------------*/
+  22          /*--5.±¾´úÂë£¬Çë¸ü»»SRCCIDÎªÄãµÄÉè±¸CID,  SRCOPENIDÎªÄãµÄopenid ,      netConfigÕâÀïÃæ°üº¬ÄãµÄWiFiÃûºÍÃÜÂë
+             --------------*/
+  23          /*--6.openidºÜÖØÒª£¬Çë²»ÒªÍâÐ¹£¡--------------------------------------------------------------------------
+             --------------*/
+  24          
+  25          /* ------------------------------»¶Ó­¼¼Êõ½»Á÷-------------------------------------------------------------
+             --------------*/
+  26          /* ---------------------------- QQÈº:630017549------------------------------------------------------------
+             --------------*/
+  27          /* -----------------------------Î¢ÐÅ: fairycloud----------------------------------------------------------
+             --------------*/
+  28          /* -------------------------------QQ:1055417926-----------------------------------------------------------
+             --------------*/
+  29          
+  30          /* ------------------------------------ END --------------------------------------------------------------
+             --------------*/
+  31           
+  32          
+  33          #include "STC15W4K58S4.h"
+  34          #include "DHT11.h"
+  35          #include "intrins.h"
+  36          #include <string.h>  // ×Ö·û´®´¦ÀíÍ·ÎÄ¼þ
+  37          
+  38          #include "codetab.h"
+  39          #include "LQ12864.h"
+  40          #include "config.h"
+  41          
+  42          sbit LED = P2^5;  // LEDÌ¨µÆ
+  43          sbit Buzzer = P4^1;  // Buzzer·äÃùÆ÷  ¼ÇµÃÓÃÒ»¸öÈý¼«¹ÜÇý¶¯Å¶
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 2   
+
+  44          //ÓÃ»§Ê¹ÓÃLEDºÍ°´¼ü£¬¿É×ÔÐÐÅäÖÃÊ¹ÓÃ
+  45          sbit LED2 = P2^6;
+  46          sbit LED3 = P2^7;
+  47          sbit SW1 = P5^3;
+  48          sbit SW2 = P0^5;
+  49          sbit SW3 = P0^6;
+  50          
+  51          
+  52          // LEDÏÔÊ¾ÆÁ Òý½ÅÔÚÍ·ÎÄ¼þL112864,HÖÐÐÞ¸Ä
+  53          //sbit SCL=P4^1; //´®ÐÐÊ±ÖÓ   
+  54          //sbit SDA=P4^2; //´®ÐÐÊý¾Ý
+  55          
+  56          bit busy;
+  57          
+  58          typedef char I8;
+  59          typedef int I16;
+  60          typedef long I32;
+  61          typedef unsigned char U8; 
+  62          
+  63          U8 SRCHeader = 0x23;
+  64          
+  65          
+  66          U8 xdata DATA_GET[500]={0};//»º³åÇø³¤¶È
+  67          
+  68          static    unsigned char   CheckTime = 0;  //ÊÇ·ñÒÑºÍ·þÎñÆ÷Í¬²½Ê±¼ä    ±êÊ¶
+  69          static    unsigned char   CheckAuth = 0; //ÊÇ·ñÒÑµÇÂ½ÑéÖ¤   ±êÊ¶
+  70          static   unsigned int xdata  Timestamp[6] = {0x00,0x00,0x00,0x00,0x00,0x00};  //ÓÃÀ´±£´æ·þÎñÆ÷µÄÊ±¼äÊý¾Ý
+  71          
+  72          static    unsigned char   AutoSendMsgFlag = 0;// flag
+  73          
+  74          
+  75          U8 CURRENT_LENGTH=0;
+  76          
+  77          static   unsigned int   Timer4_Count=1;
+  78          static   unsigned int   Timeout_Count=0;
+  79          static   unsigned int   DisplayTime_Count=0;
+  80          static   unsigned char i;
+  81          
+  82          #define FOSC 11059200L          //ÏµÍ³ÆµÂÊ
+  83          #define BAUD 115200             //´®¿Ú²¨ÌØÂÊ
+  84          
+  85          #define S1_S0 0x40              //P_SW1.6
+  86          #define S1_S1 0x80              //P_SW1.7
+  87          
+  88          
+  89          void DELAY_MS(unsigned int timeout);    //@11.0592MHz   1ms
+  90          void DELAY_1MS() ;
+  91          void UART_TC (unsigned char *str);
+  92          void UART_T (unsigned char UART_data); //¶¨Òå´®¿Ú·¢ËÍÊý¾Ý±äÁ¿
+  93          void UART_R();//½ÓÊÜÊý¾Ý
+  94          void ConnectServer();//Á¬½Ó·þÎñÆ÷
+  95          void ReConnectServer();//ÖØÆôWIFIÁ¬½Ó·þÎñÆ÷
+  96          void USART_Init();
+  97          void Device_Init();
+  98          void SendAckData(U8 len, unsigned char *RES_DATA);
+  99          void Timer4Init();
+ 100          unsigned char CheckBCC(unsigned char len, unsigned char *recv);
+ 101          void ResponseData(unsigned char len,unsigned char *RES_DATA);
+ 102          void Buzzer_Actions_Status(unsigned char status);
+ 103          void Led_Actions_Status(unsigned char status);
+ 104          
+ 105          void Timer0Init(void);
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 3   
+
+ 106          void LEDFunc(unsigned char TEMP,unsigned char HUMI) ;//LEDÏÔÊ¾ÎÂÊª¶È// SCL½ÓP4^1  // SDA½ÓP4^2
+ 107          void AutoSendMsg();
+ 108          
+ 109          
+ 110          void main(){
+ 111   1          P0M0 = 0x00;
+ 112   1          P0M1 = 0x00;
+ 113   1          P1M0 = 0x00;
+ 114   1          P1M1 = 0x00;
+ 115   1          P2M0 = 0x20;
+ 116   1          P2M1 = 0x00;
+ 117   1          P3M0 = 0x00;
+ 118   1          P3M1 = 0x00;
+ 119   1          P4M0 = 0x00;
+ 120   1          P4M1 = 0x00;
+ 121   1          P5M0 = 0x00;
+ 122   1          P5M1 = 0x00;
+ 123   1          P6M0 = 0x00;
+ 124   1          P6M1 = 0x00;
+ 125   1          P7M0 = 0x00;
+ 126   1          P7M1 = 0x00;
+ 127   1          
+ 128   1          Device_Init();//³õÊ¼»¯Ó²¼þ
+ 129   1      
+ 130   1      
+ 131   1          OLED_Init(); //OLED³õÊ¼»¯
+ 132   1          
+ 133   1          LEDFunc(0,0);
+ 134   1          OLED_P6x8Str(0,7,"status: Starting    ");//connected closed starting
+ 135   1      
+ 136   1      
+ 137   1          USART_Init();//³õÊ¼»¯ÓëWiFiÍ¨ÐÅµÄ´®¿Ú
+ 138   1          
+ 139   1          if(PCON&0x10){  //Èç¹ûÊÇÓ²Æô¶¯(ÉÏµçÆô¶¯)µÄ»°£¬¾Í½øÐÐWiFiµÄµÚÒ»´Î³õÊ¼»¯²Ù×÷£¬ÈôÊÇÈÈÆô¶¯£¨¸´Î»Æô¶¯»ò¿´ÃÅ¹·Æ
+             -ô¶¯£©µÄ»°Ö±½ÓÌø¹ý£»ÒòÎªWiFiÔÚµÚÒ»´Î³õÊ¼»¯µÄÊ±ºò£¬¾Í½øÐÐÁË¡° ±£´æTCPÁ¬½Óµ½flash£¬ÊµÏÖÉÏµçÍ¸´«¡±
+ 140   2            PCON&=0xef;
+ 141   2            ConnectServer();
+ 142   2          }
+ 143   1      
+ 144   1              
+ 145   1          Timer4Init();
+ 146   1          Timer0Init();
+ 147   1      
+ 148   1          WDT_CONTR = 0x06;       //¿´ÃÅ¹·¶¨Ê±Æ÷Òç³öÊ±¼ä¼ÆËã¹«Ê½: (12 * 32768 * PS) / FOSC (Ãë)
+ 149   1                                  //ÉèÖÃ¿´ÃÅ¹·¶¨Ê±Æ÷·ÖÆµÊýÎª32,Òç³öÊ±¼äÈçÏÂ:
+ 150   1                                  //11.0592M : 1.14s
+ 151   1                                  //18.432M  : 0.68s
+ 152   1                                  //20M      : 0.63s
+ 153   1          WDT_CONTR |= 0x20;      //Æô¶¯¿´ÃÅ¹·  STCµ¥Æ¬»úµÄ¿´ÃÅ¹·Ò»µ©Æô¶¯ºó£¬¾ÍÃ»·¨¹Ø±Õ
+ 154   1      
+ 155   1          while(1) {
+ 156   2            WDT_CONTR |= 0x10;  //Î¹¹·³ÌÐò
+ 157   2            
+ 158   2            if(DHT11_Read_Data(&DATA_Temphui[0],&DATA_Temphui[1])==0)//ÎÂÊª¶È¼ì²â
+ 159   2            {
+ 160   3              
+ 161   3                DATA_Temphui[2]=1;   
+ 162   3                LEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
+ 163   3      
+ 164   3            }
+ 165   2            
+ 166   2            if(AutoSendMsgFlag == 1)
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 4   
+
+ 167   2            {
+ 168   3              AutoSendMsgFlag=0;
+ 169   3              AutoSendMsg();
+ 170   3      
+ 171   3            }
+ 172   2          }
+ 173   1      }
+ 174          
+ 175          void LEDFunc(unsigned char TEMP,unsigned char HUMI) {
+ 176   1        
+ 177   1        
+ 178   1          OLED_P16x16Ch(0,4,0);//Ì¨µÆ
+ 179   1          OLED_P16x16Ch(16,4,1);
+ 180   1          OLED_P16x16Ch(72,4,2);//¸æ¾¯
+ 181   1          OLED_P16x16Ch(88,4,3);
+ 182   1          
+ 183   1        //  OLED_P8x16Str(0,0,"00.00   00:00:00");//ÏÔÊ¾Ê±¼ä
+ 184   1          
+ 185   1          
+ 186   1          
+ 187   1          OLED_P8x16Char(0,0,'0'+Timestamp[1]/10%10); //ÔÂ
+ 188   1          OLED_P8x16Char(8,0,'0'+Timestamp[1]%10);    
+ 189   1          OLED_P8x16Str(16,0,".");
+ 190   1          
+ 191   1          OLED_P8x16Char(24,0,'0'+Timestamp[2]/10%10); //ÈÕ
+ 192   1          OLED_P8x16Char(32,0,'0'+Timestamp[2]%10);   
+ 193   1          OLED_P8x16Str(40,0,"   ");
+ 194   1          
+ 195   1          OLED_P8x16Char(64,0,'0'+Timestamp[3]/10%10); //Ê±
+ 196   1          OLED_P8x16Char(72,0,'0'+Timestamp[3]%10);   
+ 197   1          OLED_P8x16Str(80,0,":");
+ 198   1          
+ 199   1          OLED_P8x16Char(88,0,'0'+Timestamp[4]/10%10); //·Ö
+ 200   1          OLED_P8x16Char(96,0,'0'+Timestamp[4]%10);   
+ 201   1          OLED_P8x16Str(104,0,":");
+ 202   1          
+ 203   1          OLED_P8x16Char(112,0,'0'+Timestamp[5]/10%10); //Ãë
+ 204   1          OLED_P8x16Char(120,0,'0'+Timestamp[5]%10);    
+ 205   1          
+ 206   1      
+ 207   1      
+ 208   1      
+ 209   1          OLED_P8x16Str(0,2,"Temp:");
+ 210   1          OLED_P8x16Str(72,2,"Humi:");
+ 211   1          OLED_P16x16Ch(56,2,6);//ÇåÆÁ×´Ì¬ºóÃæµÄ¿Õ¸ñ
+ 212   1      
+ 213   1      
+ 214   1          OLED_P8x16Char(40,2,'0'+TEMP/10%10);
+ 215   1          OLED_P8x16Char(48,2,'0'+TEMP%10);   
+ 216   1          OLED_P8x16Char(112,2,'0'+HUMI/10%10);
+ 217   1          OLED_P8x16Char(120,2,'0'+HUMI%10);
+ 218   1      
+ 219   1      
+ 220   1          OLED_P8x16Str(32,4,":");
+ 221   1          OLED_P8x16Str(104,4,":");
+ 222   1          
+ 223   1          if(!LED){//ÏÔÊ¾Ì¨µÆ×´Ì¬ ¿ª/¹Ø
+ 224   2                OLED_P16x16Ch(40,4,4);
+ 225   2      
+ 226   2          }else{
+ 227   2                OLED_P16x16Ch(40,4,5);
+ 228   2      
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 5   
+
+ 229   2          }
+ 230   1          
+ 231   1          OLED_P16x16Ch(56,4,6);//ÇåÆÁ×´Ì¬ºóÃæµÄ¿Õ¸ñ
+ 232   1      
+ 233   1          if(!Buzzer){//ÏÔÊ¾¸æ¾¯×´Ì¬ ¿ª/¹Ø
+ 234   2                OLED_P16x16Ch(112,4,4);
+ 235   2      
+ 236   2          }else{
+ 237   2                OLED_P16x16Ch(112,4,5);
+ 238   2      
+ 239   2          }
+ 240   1          OLED_P16x16Ch(112,6,6);//ÇåÆÁ×îºó×´Ì¬ºóÃæµÄ¿Õ¸ñ
+ 241   1      
+ 242   1              
+ 243   1          if(CheckTime==0){
+ 244   2              OLED_P6x8Str(0,7,"status: CheckTime  ");//connected closed starting
+ 245   2          }else if(CheckAuth==0){
+ 246   2              OLED_P6x8Str(0,7,"status: CheckAuth  ");//connected closed starting
+ 247   2          }else{
+ 248   2              OLED_P6x8Str(0,7,"status: Connected  ");//Connected  Starting
+ 249   2          }
+ 250   1              
+ 251   1      
+ 252   1        }
+ 253          
+ 254          unsigned char CheckBCC(unsigned char len, unsigned char *recv){
+ 255   1          unsigned char bcc = 0x00;
+ 256   1          unsigned char i=0;
+ 257   1          for(i=0;i<len-1;i++)
+ 258   1          {
+ 259   2              bcc^=recv[i];
+ 260   2          };
+ 261   1          return bcc;
+ 262   1      
+ 263   1      }
+ 264          
+ 265          void ResponseData(unsigned char len,unsigned char *RES_DATA) {
+ 266   1        
+ 267   1        if(len <26){
+ 268   2          return ;
+ 269   2        }
+ 270   1      
+ 271   1      
+ 272   1      //Ð£ÑéºÍ
+ 273   1        if(CheckBCC(len, RES_DATA) == RES_DATA[len-1]){
+ 274   2        
+ 275   2           unsigned int dataCmdFlag =(RES_DATA[2] << 8) | RES_DATA[3];         //ÃüÁî±êÊ¶
+ 276   2           unsigned char dataCmdAck = RES_DATA[4];          //Ó¦´ð±êÊ¶
+ 277   2           unsigned char j=0;
+ 278   2           unsigned char dataEncryptFlag = RES_DATA[22];    //¼ÓÃÜ·½Ê½
+ 279   2           unsigned char dataUintLength = (RES_DATA[23] << 8) | RES_DATA[24];  //Êý¾Ý³¤¶È
+ 280   2      
+ 281   2         //Ð£ÑéCIDÊÇ·ñÕýÈ·
+ 282   2           for(j=5;j<22;j++){
+ 283   3              if(SRCCID[j-5] != RES_DATA[j]){
+ 284   4               return;
+ 285   4             }
+ 286   3           }
+ 287   2          
+ 288   2           //Ð£Ñé³¤¶ÈÊÇ·ñÕýÈ·
+ 289   2           if ((26 + dataUintLength) != len) {
+ 290   3              return ;
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 6   
+
+ 291   3           }
+ 292   2           
+ 293   2           Timeout_Count = 0;//½«±¾µØµÄ30sÖØÁ¬¼ÆÊýÇåÁã
+ 294   2           
+ 295   2      
+ 296   2           
+ 297   2           if(dataCmdFlag == 0x8001){//Á¬½ÓÈÏÖ¤
+ 298   3              if(RES_DATA[31] == 0x7E){//Í¬²½Ê±¼ä½á¹û
+ 299   4                unsigned char j=0;
+ 300   4                 for(j=0;j<6;j++){
+ 301   5                  Timestamp[j] = RES_DATA[j+32];
+ 302   5               }
+ 303   4                 
+ 304   4                 Timestamp[0] = Timestamp[0] ;
+ 305   4                 CheckTime = 1;
+ 306   4           
+ 307   4              }else  if(RES_DATA[31] == 0x01){//Á¬½ÓÈÏÖ¤½á¹û
+ 308   4                 
+ 309   4                 CheckAuth = 1;
+ 310   4              }
+ 311   3             
+ 312   3             
+ 313   3           }else if(dataCmdFlag ==0x8002){//ÊµÊ±ÐÅÏ¢Ö÷¶¯ÉÏ±¨
+ 314   3             
+ 315   3           }else if(dataCmdFlag ==0x8003){//²¹·¢
+ 316   3             
+ 317   3           }else if(dataCmdFlag ==0x8004){//Éè±¸µÇ³ö
+ 318   3             
+ 319   3           }else if(dataCmdFlag ==0x8005){//ÐÄÌø
+ 320   3             
+ 321   3           }else if(dataCmdFlag ==0x8006){//Ô¶³Ì¿ØÖÆ
+ 322   3      
+ 323   3             if(RES_DATA[31] == 0x02){//»ù´¡Êý¾Ý²éÑ¯  ÎÂ¶È¡¢Êª¶È¡¢Ì¨µÆ¡¢¸æ¾¯£»Çë¼û¡¾ÐÅÏ¢Ìå¶¨Òå¡¿
+ 324   4           
+ 325   4               
+ 326   4             }else if(RES_DATA[31] == 0x03){//»ù´¡¿ØÖÆ  Ì¨µÆ¡¢¸æ¾¯£»Çë¼û¡¾ÐÅÏ¢Ìå¶¨Òå¡¿
+ 327   4      
+ 328   4               //Ì¨µÆ£º0X02£¬0X02¿ªÆô£»0X01¹Ø±Õ£»
+ 329   4               //¸æ¾¯£º0X03£¬0X02¿ªÆô£»0X01¹Ø±Õ£»
+ 330   4               
+ 331   4                 unsigned char sensor = RES_DATA[32];
+ 332   4                 unsigned char cmd = RES_DATA[33];
+ 333   4                if(sensor==0x02){
+ 334   5                     if( cmd==0x02){
+ 335   6                        Led_Actions_Status(0);//¿ªÆô
+ 336   6                      }else if( cmd==0x01){
+ 337   6                        Led_Actions_Status(1);//¹Ø±Õ
+ 338   6                      }
+ 339   5                }else if(sensor==0x03){
+ 340   5                  
+ 341   5                     if( cmd==0x02){
+ 342   6                        Buzzer_Actions_Status(0);//¿ªÆô
+ 343   6                     }else if( cmd==0x01){
+ 344   6                        Buzzer_Actions_Status(1);//¹Ø±Õ
+ 345   6                     }
+ 346   5                 
+ 347   5               }
+ 348   4                 
+ 349   4                 
+ 350   4                RES_DATA[0] = 0X23;
+ 351   4                RES_DATA[1] = 0X23;
+ 352   4                RES_DATA[2] = 0X10;
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 7   
+
+ 353   4                RES_DATA[3] = 0X06;
+ 354   4      
+ 355   4                if(dataCmdAck == 0xFE){
+ 356   5                  RES_DATA[4] = 0x01;//³É¹¦
+ 357   5                
+ 358   5                }
+ 359   4                if(dataCmdAck == 0xFE){//Ó¦´ð±êÊ¶
+ 360   5                  RES_DATA[4] = 0x01;//³É¹¦
+ 361   5                  
+ 362   5                }
+ 363   4            
+ 364   4               for(j=0;j<17;j++){//CID¸³Öµ
+ 365   5                  RES_DATA[j+5] = SRCCID[j];
+ 366   5               }
+ 367   4              RES_DATA[22] = 0X01;//²»¼ÓÃÜ
+ 368   4              RES_DATA[23] = 0X00;//³¤¶ÈÁ½Î» ¸ßÎ»00
+ 369   4              RES_DATA[24] = 0X09;//µÍÎ»09 Ò»¹²9Î»    6Î»µÄÊ±¼ä+1Î»µÄÃüÁî±êÊ¶ + 2Î»µÄÊý¾Ý
+ 370   4      
+ 371   4              RES_DATA[25] = Timestamp[0];//Äê 0x14+2000 = 2020 
+ 372   4              RES_DATA[26] = Timestamp[1];//ÔÂ 
+ 373   4              RES_DATA[27] = Timestamp[2];//ÈÕ 
+ 374   4              RES_DATA[28] = Timestamp[3];//Ê± 
+ 375   4              RES_DATA[29] = Timestamp[4];//·Ö
+ 376   4              RES_DATA[30] = Timestamp[5];//Ãë
+ 377   4              
+ 378   4              RES_DATA[31] = 0X03;//»ù´¡¿ØÖÆ  Ì¨µÆ¡¢¸æ¾¯£»Çë¼û¡¾ÐÅÏ¢Ìå¶¨Òå¡¿
+ 379   4              
+ 380   4      //        RES_DATA[32] = RES_DATA[32];// ÕâÁ½Î»²»ÓÃ¸Ä¶¯  
+ 381   4      //        RES_DATA[33] = RES_DATA[33];
+ 382   4              
+ 383   4              
+ 384   4                  RES_DATA[len-1] = CheckBCC(len, RES_DATA);//ÕâÒ»Ö¡Êý¾Ý 35¸ö×Ö½Ú len=35
+ 385   4                  SendAckData(len,RES_DATA);
+ 386   4      
+ 387   4             
+ 388   4             }else if(RES_DATA[31] == 0x7F){//ÖØÆô
+ 389   4                IAP_CONTR = 0X20;
+ 390   4             }
+ 391   3             
+ 392   3             
+ 393   3              AutoSendMsgFlag = 1;
+ 394   3             
+ 395   3           }
+ 396   2      
+ 397   2          //Ë¢ÐÂÒ»ÏÂLEDÆÁÄ»
+ 398   2          LEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
+ 399   2        }
+ 400   1        
+ 401   1        
+ 402   1        
+ 403   1      }
+ 404          
+ 405          
+ 406          void AutoSendMsg(){
+ 407   1            unsigned char light_status = (LED==1) ? 0x01 : 0x02;    //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
+ 408   1            unsigned char buzzy_status = (Buzzer==1) ? 0x01 : 0x02;  //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
+ 409   1            unsigned char xdata ds[37] = {0}; 
+ 410   1            unsigned char dslen =37;
+ 411   1            unsigned char j=0;
+ 412   1          
+ 413   1            ds[0] = 0X23;//Êý¾ÝÍ·
+ 414   1            ds[1] = 0X23;
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 8   
+
+ 415   1            ds[2] = 0X10;//ÃüÁî±êÊ¶  ÏÂ·¢0x8006  ¶ÔÓÚµÄÉÏ´«ÊÇ0x1006
+ 416   1            ds[3] = 0X06;
+ 417   1            
+ 418   1            ds[4] = 0x01;//³É¹¦
+ 419   1              
+ 420   1      
+ 421   1           for(j=0;j<17;j++){//CID¸³Öµ
+ 422   2              ds[j+5] = SRCCID[j];
+ 423   2           }
+ 424   1          ds[22] = 0X01;//²»¼ÓÃÜ
+ 425   1          ds[23] = 0X00;//³¤¶ÈÁ½Î» ¸ßÎ»00
+ 426   1          ds[24] = 0X0B;//µÍÎ»0B Ò»¹²11Î»
+ 427   1      
+ 428   1          ds[25] = Timestamp[0];//Äê 0x14+2000 = 2020 
+ 429   1          ds[26] = Timestamp[1];//ÔÂ 
+ 430   1          ds[27] = Timestamp[2];//ÈÕ 
+ 431   1          ds[28] = Timestamp[3];//Ê± 
+ 432   1          ds[29] = Timestamp[4];//·Ö
+ 433   1          ds[30] = Timestamp[5];//Ãë
+ 434   1          
+ 435   1          ds[31] = 0X02;//»ù´¡²éÑ¯   ±àÂë
+ 436   1      
+ 437   1      
+ 438   1            ds[32] = DATA_Temphui[0]; //»ù´¡Êý¾Ý4¸ö×Ö½ÚµÄÊý¾Ý
+ 439   1            ds[33] = DATA_Temphui[1];
+ 440   1            ds[34] = light_status;
+ 441   1            ds[35] = buzzy_status;
+ 442   1            
+ 443   1      
+ 444   1            
+ 445   1           ds[dslen-1] = CheckBCC(dslen, ds);//¼ÆËãÐ£ÑéºÍ  ·Å×îºóÒ»Î»
+ 446   1              SendAckData(dslen,ds);
+ 447   1      
+ 448   1               
+ 449   1      }
+ 450          
+ 451          
+ 452          void DELAY_1MS() {
+ 453   1          unsigned char i, j;
+ 454   1      
+ 455   1          _nop_();
+ 456   1          _nop_();
+ 457   1          _nop_();
+ 458   1          i = 11;
+ 459   1          j = 190;
+ 460   1          do
+ 461   1          {
+ 462   2              while (--j);
+ 463   2          } while (--i);
+ 464   1      
+ 465   1      
+ 466   1      }
+ 467          
+ 468          void DELAY_MS(unsigned int timeout)   //@11.0592MHz
+ 469          {
+ 470   1          int t = 0;
+ 471   1          while (t < timeout)
+ 472   1          {
+ 473   2              t++;
+ 474   2              DELAY_1MS();
+ 475   2          }
+ 476   1      }
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 9   
+
+ 477          
+ 478          
+ 479          
+ 480          //³õÊ¼»¯LEDÌ¨µÆºÍBuzzer¸æ¾¯ //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
+ 481          void Device_Init() {
+ 482   1      
+ 483   1          LED = 1;
+ 484   1          Buzzer = 1;
+ 485   1      }
+ 486          
+ 487          
+ 488          void USART_Init()
+ 489          {
+ 490   1      
+ 491   1      //   ACC = P_SW1;
+ 492   1      //    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
+ 493   1      //    P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
+ 494   1      
+ 495   1          ACC = P_SW1;
+ 496   1          ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
+ 497   1          ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
+ 498   1          P_SW1 = ACC;
+ 499   1          SCON = 0x50;                //8Î»¿É±ä²¨ÌØÂÊ
+ 500   1          PS = 1;
+ 501   1          
+ 502   1      //  ACC = P_SW1;
+ 503   1      //  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=1
+ 504   1      //  ACC |= S1_S1;               //(P1.6/RxD_3, P1.7/TxD_3)
+ 505   1      //  P_SW1 = ACC;
+ 506   1      
+ 507   1      
+ 508   1          AUXR = 0x40;                //¶¨Ê±Æ÷1Îª1TÄ£Ê½
+ 509   1          TMOD = 0x00;                //¶¨Ê±Æ÷1ÎªÄ£Ê½0(16Î»×Ô¶¯ÖØÔØ)
+ 510   1          TL1 = (65536 - (FOSC/4/BAUD));   //ÉèÖÃ²¨ÌØÂÊÖØ×°Öµ
+ 511   1          TH1 = (65536 - (FOSC/4/BAUD))>>8;
+ 512   1          TR1 = 1;                    //¶¨Ê±Æ÷1¿ªÊ¼Æô¶¯
+ 513   1          ES = 1;                     //Ê¹ÄÜ´®¿ÚÖÐ¶Ï
+ 514   1          EA = 1;
+ 515   1      
+ 516   1      }
+ 517          
+ 518          /*----------------------------
+ 519          UART ÖÐ¶Ï·þÎñ³ÌÐò
+ 520          -----------------------------*/
+ 521          void Uart() interrupt 4 using 1
+ 522          {
+ 523   1          if (RI)
+ 524   1          {
+ 525   2              while(!RI);
+ 526   2              RI=0;
+ 527   2              UART_R();
+ 528   2              busy = 0;
+ 529   2      
+ 530   2          }
+ 531   1          if (TI)
+ 532   1          {
+ 533   2              while(!TI);
+ 534   2              TI = 0;                 //Çå³ýTIÎ»
+ 535   2              busy = 0;               //ÇåÃ¦±êÖ¾
+ 536   2          }
+ 537   1      }
+ 538          
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 10  
+
+ 539          
+ 540          void UART_T (unsigned char UART_data) { //¶¨Òå´®¿Ú·¢ËÍÊý¾Ý±äÁ¿
+ 541   1          SBUF = UART_data; //½«½ÓÊÕµÄÊý¾Ý·¢ËÍ»ØÈ¥
+ 542   1          while(!TI);   //¼ì²é·¢ËÍÖÐ¶Ï±êÖ¾Î»
+ 543   1          TI = 0;     //Áî·¢ËÍÖÐ¶Ï±êÖ¾Î»Îª0£¨Èí¼þÇåÁã£©
+ 544   1      }
+ 545          
+ 546          
+ 547          void UART_TC (unsigned char *str) {
+ 548   1          while(*str != '\0') {
+ 549   2              UART_T(*str);
+ 550   2              *str++;
+*** WARNING C275 IN LINE 550 OF ..\code\SmartCar.c: expression with possibly no effect
+ 551   2          }
+ 552   1          *str = 0;
+ 553   1      }
+ 554          
+ 555          
+ 556          //´®¿Ú  ½ÓÊÕESP8266µÄ´®¿ÚÊý¾Ý£¬²¢Ð£ÑéÊý¾ÝµÄÍêÕûÐÔ9Î»
+ 557          
+ 558          void UART_R()
+ 559          {
+ 560   1          TL0 = 0x00;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 561   1        TH0 = 0xDC;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 562   1        TF0 = 0;    //Çå³ýTF0±êÖ¾
+ 563   1        TR0 = 1;    //¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
+ 564   1        ET0 = 1;  //ÔÊÐíÖÐ¶Ï
+ 565   1        
+ 566   1        
+ 567   1      
+ 568   1         DATA_GET[CURRENT_LENGTH]=SBUF;
+ 569   1         CURRENT_LENGTH++;
+ 570   1        
+ 571   1        
+ 572   1      
+ 573   1      }
+ 574          
+ 575          
+ 576          
+ 577          void SendAckData(U8 len, unsigned char *RES_DATA) {
+ 578   1        
+ 579   1          unsigned int i=0;
+ 580   1          for(i=0; i<len; i++)
+ 581   1          {
+ 582   2               
+ 583   2              SBUF=RES_DATA[i];
+ 584   2              while(!TI);   //¼ì²é·¢ËÍÖÐ¶Ï±êÖ¾Î»
+ 585   2                TI = 0; 
+ 586   2          }
+ 587   1      }
+ 588          
+ 589          //ÖØÆô ESP8266WiFiÄ£¿é
+ 590          void ReConnectServer() {
+ 591   1      
+ 592   1          UART_TC("+++\0"); // ÍË³öÍ¸´«Ä£Ê½
+ 593   1           DELAY_MS( 1000);
+ 594   1          UART_TC("AT+RST\r\n\0");  // ¸´Î»
+ 595   1          
+ 596   1      
+ 597   1          
+ 598   1      }
+ 599          
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 11  
+
+ 600          //³õÊ¼»¯ESP8266WiFiÄ£¿é£¬²¢Á¬½Óµ½·þÎñÆ÷
+ 601          void ConnectServer() {
+ 602   1      
+ 603   1          DELAY_MS( 1000);
+ 604   1      
+ 605   1          UART_TC("+++\0"); // ÍË³öÍ¸´«Ä£Ê½
+ 606   1          DELAY_MS( 1000);
+ 607   1          
+ 608   1          UART_TC("AT+CWMODE=1\r\n\0"); // ÕâÊÇÉèÖÃSTAÄ£Ê½
+ 609   1          DELAY_MS( 2500);
+ 610   1          
+ 611   1          UART_TC("AT+CIPMUX=0\r\n\0");  // ÉèÖÃµ¥Á¬½ÓÄ£Ê½
+ 612   1          DELAY_MS(1000);
+ 613   1      
+ 614   1          UART_TC(netConfig);  // ÕâÒ»²½±ãÊÇÁ¬½Ówifi£¬ÑÓÊ±µÄÊ±¼äÒª³¤Ò»Ð©£¬·ñÔò»áµÈ²»µ½·µ»ØµÄÐÅÏ¢¡£10s
+ 615   1          DELAY_MS(15000);
+ 616   1      
+ 617   1      
+ 618   1          UART_TC(TcpServer); // Á¬½Óµ½Ö¸¶¨TCP·þÎñÆ÷182.92.238.186
+ 619   1          DELAY_MS( 5000);
+ 620   1      
+ 621   1          UART_TC("AT+CIPMODE=1\r\n\0"); // ÉèÖÃÍ¸´«Ä£Ê½
+ 622   1          DELAY_MS( 2000);
+ 623   1      
+ 624   1         UART_TC(SaveTcpServer); // ±£´æTCPÁ¬½Óµ½flash£¬ÊµÏÖÉÏµçÍ¸´«
+ 625   1         DELAY_MS(1000);
+ 626   1      
+ 627   1          UART_TC("AT+CIPSEND\r\n\0");   // ½øÈëÍ¸´«Ä£Ê½ ×¼±¸Ä£¿éÓëµçÄÔ½øÐÐ»¥´«Êý¾Ý
+ 628   1          DELAY_MS( 1000);
+ 629   1          
+ 630   1          
+ 631   1      
+ 632   1      }
+ 633          
+ 634          void Timer4Init(void)   
+ 635          {
+ 636   1        //50 ºÁÃë@11.0592MHz
+ 637   1        T4T3M &= 0xDF;    //¶¨Ê±Æ÷Ê±ÖÓ12TÄ£Ê½
+ 638   1        T4L = 0x00;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 639   1        T4H = 0x4C;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 640   1        T4T3M |= 0x80;    //¶¨Ê±Æ÷4¿ªÊ¼¼ÆÊ±
+ 641   1        
+ 642   1          IE2 |= 0x40;    //¿ª¶¨Ê±Æ÷4ÖÐ¶Ï
+ 643   1          EA=1;   //×ÜÖÐ¶Ï¿ªÆô
+ 644   1      }
+ 645          
+ 646          
+ 647          //10sÖÐ¶Ï×Ô¶¯ÉÏ±¨ÐÅÏ¢
+ 648          void Timer4_interrupt() interrupt 20    //¶¨Ê±ÖÐ¶ÏÈë¿Ú
+ 649          {
+ 650   1        
+ 651   1      
+ 652   1        
+ 653   1        if(DisplayTime_Count>=20){  //20 * 50ms = 1s
+ 654   2          DisplayTime_Count = 0;
+ 655   2          
+ 656   2          if(CheckTime==1){  //ÒÑ¾­Í¬²½¹ý·þÎñÆ÷Ê±¼äºó
+ 657   3            
+ 658   3            Timestamp[5] =  Timestamp[5] + 1;//Ãë
+ 659   3            
+ 660   3            if(Timestamp[5]>=60){
+ 661   4              Timestamp[5] = 0;
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 12  
+
+ 662   4              Timestamp[4] = Timestamp[4] + 1;//·Ö
+ 663   4              
+ 664   4              if(Timestamp[4]>=60){
+ 665   5                Timestamp[4] = 0;
+ 666   5                Timestamp[3] = Timestamp[3] + 1;//Ð¡Ê±
+ 667   5                
+ 668   5                if(Timestamp[3]>=24){
+ 669   6                  Timestamp[3] = 0;
+ 670   6                  Timestamp[2] = Timestamp[2] + 1;//Ìì
+ 671   6                  
+ 672   6                  if( ((Timestamp[1] == 4 || Timestamp[1] == 6 || Timestamp[1] == 9 || Timestamp[1] == 11) && Timestam
+             -p[2]>=30) || ((Timestamp[1] == 1 || Timestamp[1] == 3 || Timestamp[1] == 5 || Timestamp[1] == 7 || Timestamp[1] == 8 || 
+             -Timestamp[1] == 10 || Timestamp[1] == 12) && Timestamp[2]>=31) || ((((Timestamp[0] % 4 == 0 && Timestamp[0] % 100 != 0) 
+             -|| Timestamp[0] % 400 == 0) == 1  && Timestamp[2]>=29 ) ||  (((Timestamp[0] % 4 == 0 && Timestamp[0] % 100 != 0) || Time
+             -stamp[0] % 400 == 0) == 1  && Timestamp[2]>=28) ) ){
+ 673   7                    Timestamp[2] = 1;
+ 674   7                    Timestamp[1] = Timestamp[1] + 1;//ÔÂ
+ 675   7                    
+ 676   7                    if(Timestamp[1]>=13){
+ 677   8                      Timestamp[1] = 1;
+ 678   8                      Timestamp[0] = Timestamp[0] + 1;//Äê
+ 679   8                     }
+ 680   7                    
+ 681   7                   }
+ 682   6                  
+ 683   6                }
+ 684   5                
+ 685   5              } 
+ 686   4              
+ 687   4             }
+ 688   3            
+ 689   3            }
+ 690   2          
+ 691   2          
+ 692   2          
+ 693   2              if(CheckTime==0){//Éè±¸Í¬²½Ê±¼ä
+ 694   3                
+ 695   3                    unsigned char j=0;
+ 696   3                    U8 xdata RES_DATA[65]= {0};
+ 697   3                    unsigned char RES_LEN= 65;
+ 698   3                    
+ 699   3                    RES_DATA[0] = 0X23;//Êý¾ÝÍ·
+ 700   3                    RES_DATA[1] = 0X23;
+ 701   3                    RES_DATA[2] = 0X10;//ÃüÁî±êÊ¶  ÏÂ·¢0x8006  ¶ÔÓÚµÄÉÏ´«ÊÇ0x1006
+ 702   3                    RES_DATA[3] = 0X01;
+ 703   3                    RES_DATA[4] = 0xFE;//Ó¦´ð±êÊ¶
+ 704   3                      
+ 705   3                   for(j=0;j<17;j++){//CID¸³Öµ
+ 706   4                      RES_DATA[j+5] = SRCCID[j];
+ 707   4                   }
+ 708   3                   
+ 709   3                  RES_DATA[22] = 0X01;//²»¼ÓÃÜ
+ 710   3                  RES_DATA[23] = 0X00;//³¤¶ÈÁ½Î» ¸ßÎ»00
+ 711   3                  RES_DATA[24] = 0X27;//µÍÎ»0x27 
+ 712   3      
+ 713   3                  for(j=0;j<6;j++){//Timestamp
+ 714   4                      RES_DATA[j+25] = Timestamp[j];
+ 715   4                   }
+ 716   3                
+ 717   3                  
+ 718   3                  RES_DATA[31] = 0X7E;//Í¬²½Ê±¼ä
+ 719   3      
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 13  
+
+ 720   3                  for(j=0;j<32;j++){//openid
+ 721   4                      RES_DATA[j+32] = SRCOPENID[j];
+ 722   4                   }
+ 723   3                
+ 724   3                RES_DATA[RES_LEN-1] = CheckBCC(RES_LEN, RES_DATA);
+ 725   3                              
+ 726   3                SendAckData(RES_LEN,RES_DATA);
+ 727   3                
+ 728   3              
+ 729   3              } else if( CheckAuth ==0 ){//Éè±¸µÇÂ½ÈÏÖ¤
+ 730   3                
+ 731   3                  unsigned char j=0;
+ 732   3                    U8 xdata RES_DATA[65]= {0};
+ 733   3                    unsigned char RES_LEN= 65;
+ 734   3                    
+ 735   3                    RES_DATA[0] = 0X23;//Êý¾ÝÍ·
+ 736   3                    RES_DATA[1] = 0X23;
+ 737   3                    RES_DATA[2] = 0X10;//ÃüÁî±êÊ¶  ÏÂ·¢0x8006  ¶ÔÓÚµÄÉÏ´«ÊÇ0x1006
+ 738   3                    RES_DATA[3] = 0X01;
+ 739   3                    RES_DATA[4] = 0xFE;//Ó¦´ð±êÊ¶
+ 740   3                      
+ 741   3                   for(j=0;j<17;j++){//CID¸³Öµ
+ 742   4                      RES_DATA[j+5] = SRCCID[j];
+ 743   4                   }
+ 744   3                   
+ 745   3                  RES_DATA[22] = 0X01;//²»¼ÓÃÜ
+ 746   3                  RES_DATA[23] = 0X00;//³¤¶ÈÁ½Î» ¸ßÎ»00
+ 747   3                  RES_DATA[24] = 0X27;//µÍÎ»0x27 
+ 748   3      
+ 749   3                  for(j=0;j<6;j++){//Timestamp
+ 750   4                      RES_DATA[j+25] = Timestamp[j];
+ 751   4                   }
+ 752   3                
+ 753   3                  
+ 754   3                  RES_DATA[31] = 0X01;//µÇÂ½ÈÏÖ¤
+ 755   3      
+ 756   3                  for(j=0;j<32;j++){//openid
+ 757   4                      RES_DATA[j+32] = SRCOPENID[j];
+ 758   4                   }
+ 759   3                
+ 760   3                RES_DATA[RES_LEN-1] = CheckBCC(RES_LEN, RES_DATA);
+ 761   3                              
+ 762   3                SendAckData(RES_LEN,RES_DATA);
+ 763   3                
+ 764   3                
+ 765   3              }else {
+ 766   3                
+ 767   3                
+ 768   3              }
+ 769   2      
+ 770   2          
+ 771   2          
+ 772   2          
+ 773   2        }else{
+ 774   2           DisplayTime_Count++;//Ã¿¼ÓÒ»´Î¼Ó50ms
+ 775   2        }
+ 776   1            
+ 777   1              if(Timer4_Count>=200){  //200 * 50ms = 10s
+ 778   2                    unsigned char j=0;
+ 779   2                    U8 xdata RES_DATA[37]= {0};
+ 780   2                    unsigned char RES_LEN= 37;
+ 781   2                    unsigned char  light_status = (LED==1) ? 0x01 : 0x02;    //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 14  
+
+ 782   2                    unsigned char buzzy_status = (Buzzer==1) ? 0x01 : 0x02;  //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
+ 783   2                    Timer4_Count = 0;
+ 784   2        
+ 785   2                    RES_DATA[0] = 0X23;//Êý¾ÝÍ·
+ 786   2                    RES_DATA[1] = 0X23;
+ 787   2                    RES_DATA[2] = 0X10;//ÃüÁî±êÊ¶  ÏÂ·¢0x8006  ¶ÔÓÚµÄÉÏ´«ÊÇ0x1006
+ 788   2                    RES_DATA[3] = 0X06;
+ 789   2                    RES_DATA[4] = 0xFE;//Ó¦´ð±êÊ¶
+ 790   2                      
+ 791   2                   for(j=0;j<17;j++){//CID¸³Öµ
+ 792   3                      RES_DATA[j+5] = SRCCID[j];
+ 793   3                   }
+ 794   2                   
+ 795   2                  RES_DATA[22] = 0X01;//²»¼ÓÃÜ
+ 796   2                  RES_DATA[23] = 0X00;//³¤¶ÈÁ½Î» ¸ßÎ»00
+ 797   2                  RES_DATA[24] = 0X0B;//µÍÎ»0B Ò»¹²11Î»
+ 798   2      
+ 799   2                  RES_DATA[25] = Timestamp[0];//Äê 0x14+2000 = 2020 
+ 800   2                  RES_DATA[26] = Timestamp[1];//ÔÂ 
+ 801   2                  RES_DATA[27] = Timestamp[2];//ÈÕ 
+ 802   2                  RES_DATA[28] = Timestamp[3];//Ê± 
+ 803   2                  RES_DATA[29] = Timestamp[4];//·Ö
+ 804   2                  RES_DATA[30] = Timestamp[5];//Ãë
+ 805   2                  
+ 806   2                  RES_DATA[31] = 0X02;//»ù´¡Êý¾ÝÉÏ±¨
+ 807   2      
+ 808   2                RES_DATA[32] = DATA_Temphui[0];
+ 809   2                RES_DATA[33] =  DATA_Temphui[1];
+ 810   2                RES_DATA[34] = light_status;
+ 811   2                RES_DATA[35] = buzzy_status,
+ 812   2                RES_DATA[RES_LEN-1] = CheckBCC(RES_LEN, RES_DATA);
+ 813   2                    
+ 814   2                Timeout_Count++;//Ã¿¼ÓÒ»´Î¼Ó10s
+ 815   2                
+ 816   2                if(Timeout_Count < 3 && CheckTime==1 && CheckAuth ==1){ //Ã»ÓÐÈÏÖ¤³É¹¦·¢ÁË·þÎñÆ÷Ò²»á¾Ü¾ø
+ 817   3                  
+ 818   3                  SendAckData(RES_LEN,RES_DATA);
+ 819   3              }else if(Timeout_Count >= 3){//30s»¹ÊÇÊÕ²»µ½·þÎñÆ÷·µ»ØµÄÊý¾Ý£¬Ôò ÖØÆô»úÆ÷
+ 820   3                  
+ 821   3                  ReConnectServer();
+ 822   3                  Timeout_Count = 0;
+ 823   3                  
+ 824   3                      //ÖØÐÂÈÏÖ¤
+ 825   3                      CheckTime = 0;
+ 826   3                      CheckAuth = 0;
+ 827   3                    OLED_P6x8Str(0,7,"status: Closed    ");//Connected closed starting
+ 828   3      
+ 829   3                }
+ 830   2                
+ 831   2              }else{
+ 832   2                
+ 833   2                  Timer4_Count++;
+ 834   2              }
+ 835   1              
+ 836   1      
+ 837   1          
+ 838   1      }
+ 839          
+ 840          
+ 841          
+ 842          
+ 843          
+C51 COMPILER V9.60.7.0   SMARTCAR                                                          06/14/2024 11:11:31 PAGE 15  
+
+ 844          void Timer0Init(void)   //10ºÁÃë@11.0592MHz
+ 845          {
+ 846   1        AUXR &= 0x7F;   //¶¨Ê±Æ÷Ê±ÖÓ12TÄ£Ê½
+ 847   1        TMOD &= 0xF0;   //ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+ 848   1        TMOD |= 0x01;   //ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+ 849   1        TL0 = 0x00;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 850   1        TH0 = 0xB8;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 851   1        TF0 = 0;    //Çå³ýTF0±êÖ¾
+ 852   1        TR0 = 1;    //¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
+ 853   1        ET0 = 1;  //ÔÊÐíÖÐ¶Ï
+ 854   1      }
+ 855          
+ 856          
+ 857          
+ 858          /********************* Timer0ÖÐ¶Ïº¯Êý************************/
+ 859          void timer0_int (void) interrupt 1
+ 860          {
+ 861   1        TL0 = 0x00;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 862   1        TH0 = 0xB8;   //ÉèÖÃ¶¨Ê±³õÖµ
+ 863   1        TF0 = 0;    //Çå³ýTF0±êÖ¾
+ 864   1        TR0 = 0;    //¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
+ 865   1        ET0 = 0;  //ÔÊÐíÖÐ¶Ï
+ 866   1        
+ 867   1        ResponseData(CURRENT_LENGTH,DATA_GET);    
+ 868   1        CURRENT_LENGTH = 0;
+ 869   1            
+ 870   1      }
+ 871          
+ 872          
+ 873          void Led_Actions_Status(unsigned char status){  //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
+ 874   1      
+ 875   1        if(status){
+ 876   2          LED = 1;
+ 877   2        }else{
+ 878   2          LED = 0;
+ 879   2        }
+ 880   1      
+ 881   1      }
+ 882          
+ 883          void Buzzer_Actions_Status(unsigned char status){ //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
+ 884   1      
+ 885   1        if(status){
+ 886   2          Buzzer = 1;
+ 887   2        }else{
+ 888   2          Buzzer = 0;
+ 889   2        }
+ 890   1      
+ 891   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   5004    ----
+   CONSTANT SIZE    =   2727    ----
+   XDATA SIZE       =    703     163
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
