@@ -1,21 +1,6 @@
 # FairyCloud_STC15BD_PUBLIC
 STC15物联网核心板-硬件代码;欢迎交流：QQ群：630017549，个人微信：fairycloud2035
 
-## 示例教程
-
-### 实物图片
-![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo1.png)
-![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo2.png)
-![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo3.png)
-
-
-### 实物演示
-[【【STC15物联网核心板，小程序远程控制-哔哩哔哩】](https://b23.tv/LC0sZ2T)
-
-### 说明文档
-[【外部】精灵物联网各项目汇总](https://gv9jqt8gpcb.feishu.cn/docx/DAJGdExvZoZBA3xuAogc53ohnxg?from=from_copylink)
-
-
 ## 代码说明
 ### 代码目录
 FairyCloud_STC15BD_PUBLIC/code/
@@ -42,6 +27,20 @@ unsigned char SRCOPENID[] = {"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
 
 unsigned char TcpServer[] = "AT+CIPSTART=\"TCP\",\"xxxxxxxxxxxxxxxxx\",xxxxx\r\n\0";
 unsigned char SaveTcpServer[] = "AT+SAVETRANSLINK=1,\"xxxxxxxxxxxxxxxxx\",xxxxx,\"TCP\"\r\n\0";
+
+
+## 示例教程
+
+### 实物演示
+[【STC15物联网核心板，小程序远程控制-哔哩哔哩】](https://b23.tv/LC0sZ2T)
+
+### 说明文档
+[【外部】精灵物联网各项目汇总](https://gv9jqt8gpcb.feishu.cn/docx/DAJGdExvZoZBA3xuAogc53ohnxg?from=from_copylink)
+
+### 实物图片
+![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo1.png)
+![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo2.png)
+![image](https://github.com/fairycloudpublic/FairyCloud_STC15BD_PUBLIC/blob/main/photo3.png)
 
 
 ## 版权说明
