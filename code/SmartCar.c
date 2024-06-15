@@ -15,12 +15,12 @@
 
 /* ----------------------------------------- 重要说明 -----------------------------------------------------------------*/
 
-/*--1.《精灵物联网》微信订阅号文章可能不是最新的，代码才是最新的-------------------------------------------------------*/
-/*--2.P2^5是LED台灯------------------------------------------------------------*/
-/*--3.12864显示屏的引脚对应关系 //sbit SCL=P4^1; 串行时钟  //sbit SDA=P4^2; 串行数据---在头文件L112864,H中修改---------*/
-/*--4.单片机启动：单片机启动==》拉取服务器时间==》OPENID认证==》建立链接==》正常通信-----------------------------------*/
-/*--5.本代码，请更换SRCCID为你的设备CID,  SRCOPENID为你的openid ,      netConfig这里面包含你的WiFi名和密码-------------*/
-/*--6.openid很重要，请不要外泄！---------------------------------------------------------------------------------------*/
+/*--1.《精灵物联网》微信订阅号文章可能不是最新的，github代码才是最新的-------------------------------------------------*/
+/*--2.P2^5是LED台灯----------------------------------------------------------------------------------------------------*/
+/*--3.P4^1是Buzzer告警-------------------------------------------------------------------------------------------------*/
+/*--4.OLED显示屏的引脚对应关系  SCL=P2^1; 串行时钟   SDA=P2^0; 串行数据---在头文件OLED.H中 13 14行修改----------------------*/
+/* ------------------------------远控配合微信小程序《精灵物联网》--------------------------------------------------------------------------*/
+
 
 /* ------------------------------欢迎技术交流--------------------------------------------------------------------------*/
 /* ---------------------------- QQ群:630017549-------------------------------------------------------------------------*/
@@ -35,9 +35,10 @@
 #include "intrins.h"
 #include <string.h>  // 字符串处理头文件
 
-#include "codetab.h"
-#include "LQ12864.h"
+#include "OLED/oled.h"
+
 #include "config.h"
+#include "delay.h"
 
 sbit LED = P2^5;  // LED台灯
 sbit Buzzer = P4^1;  // Buzzer蜂鸣器  记得用一个三极管驱动哦
@@ -47,11 +48,6 @@ sbit LED3 = P2^7;
 sbit SW1 = P5^3;
 sbit SW2 = P0^5;
 sbit SW3 = P0^6;
-
-
-// LED显示屏 引脚在头文件L112864,H中修改
-//sbit SCL=P4^1; //串行时钟   
-//sbit SDA=P4^2; //串行数据
 
 bit busy;
 
@@ -103,7 +99,7 @@ void Buzzer_Actions_Status(unsigned char status);
 void Led_Actions_Status(unsigned char status);
 
 void Timer0Init(void);
-void LEDFunc(unsigned char TEMP,unsigned char HUMI)	;//LED显示温湿度// SCL接P4^1  // SDA接P4^2
+void OLEDFunc(unsigned char TEMP,unsigned char HUMI);
 void AutoSendMsg();
 
 
@@ -128,10 +124,12 @@ void main(){
 		Device_Init();//初始化硬件
 
 
-	  OLED_Init(); //OLED初始化
-		
-		LEDFunc(0,0);
-		OLED_P6x8Str(0,7,"status: Starting    ");//connected closed starting
+		OLED_Init();
+	  OLED_Clear(0);
+
+		OLEDFunc(0,0);
+
+		OLED_ShowString(0,7,"Starting        ",8);//connected closed starting
 
 
     USART_Init();//初始化与WiFi通信的串口
@@ -159,8 +157,7 @@ void main(){
 			{
 				
 				  DATA_Temphui[2]=1;	 
-					LEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
-
+					OLEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
 			}
 			
 			if(AutoSendMsgFlag == 1)
@@ -172,84 +169,75 @@ void main(){
     }
 }
 
-void LEDFunc(unsigned char TEMP,unsigned char HUMI)	{
+//OLED屏幕显示
+void OLEDFunc(unsigned char TEMP,unsigned char HUMI){
+	
+		OLED_ShowChar(0,0,'0'+Timestamp[1]/10%10,16); //月
+	  OLED_ShowChar(8,0,'0'+Timestamp[1]%10,16);		
+		OLED_ShowChar(16,0,':',16);
+		
+		OLED_ShowChar(24,0,'0'+Timestamp[2]/10%10,16); //日
+	  OLED_ShowChar(32,0,'0'+Timestamp[2]%10,16);		
+		
+		OLED_ShowChar(64,0,'0'+Timestamp[3]/10%10,16); //时
+	  OLED_ShowChar(72,0,'0'+Timestamp[3]%10,16);		
+		OLED_ShowChar(80,0,':',16);
+		
+		OLED_ShowChar(88,0,'0'+Timestamp[4]/10%10,16); //分
+	  OLED_ShowChar(96,0,'0'+Timestamp[4]%10,16);		
+		OLED_ShowChar(104,0,':',16);
+		
+		OLED_ShowChar(112,0,'0'+Timestamp[5]/10%10,16); //秒
+	  OLED_ShowChar(120,0,'0'+Timestamp[5]%10,16);	
+
+
 	
 	
-		OLED_P16x16Ch(0,4,0);//台灯
-		OLED_P16x16Ch(16,4,1);
-		OLED_P16x16Ch(72,4,2);//告警
-		OLED_P16x16Ch(88,4,3);
+	//温湿度显示
+		OLED_ShowString(0,2,"Temp:",16);
+		OLED_ShowString(72,2,"Humi:",16);
 		
-	//	OLED_P8x16Str(0,0,"00.00   00:00:00");//显示时间
-		
-		
-		
-		OLED_P8x16Char(0,0,'0'+Timestamp[1]/10%10); //月
-	  OLED_P8x16Char(8,0,'0'+Timestamp[1]%10);		
-		OLED_P8x16Str(16,0,".");
-		
-		OLED_P8x16Char(24,0,'0'+Timestamp[2]/10%10); //日
-	  OLED_P8x16Char(32,0,'0'+Timestamp[2]%10);		
-		OLED_P8x16Str(40,0,"   ");
-		
-		OLED_P8x16Char(64,0,'0'+Timestamp[3]/10%10); //时
-	  OLED_P8x16Char(72,0,'0'+Timestamp[3]%10);		
-		OLED_P8x16Str(80,0,":");
-		
-		OLED_P8x16Char(88,0,'0'+Timestamp[4]/10%10); //分
-	  OLED_P8x16Char(96,0,'0'+Timestamp[4]%10);		
-		OLED_P8x16Str(104,0,":");
-		
-		OLED_P8x16Char(112,0,'0'+Timestamp[5]/10%10); //秒
-	  OLED_P8x16Char(120,0,'0'+Timestamp[5]%10);		
-		
+	  OLED_ShowChar(40,2,'0'+TEMP/10%10,16);
+	  OLED_ShowChar(48,2,'0'+TEMP%10,16);		
+		OLED_ShowChar(112,2,'0'+HUMI/10%10,16);
+	  OLED_ShowChar(120,2,'0'+HUMI%10,16);
 
 
+	
+		 OLED_ShowCHinese(0,4,0);//台灯
+		 OLED_ShowCHinese(16,4,1);
 
-		OLED_P8x16Str(0,2,"Temp:");
-		OLED_P8x16Str(72,2,"Humi:");
-		OLED_P16x16Ch(56,2,6);//清屏状态后面的空格
-
-
-	  OLED_P8x16Char(40,2,'0'+TEMP/10%10);
-	  OLED_P8x16Char(48,2,'0'+TEMP%10);		
-		OLED_P8x16Char(112,2,'0'+HUMI/10%10);
-	  OLED_P8x16Char(120,2,'0'+HUMI%10);
+		 OLED_ShowCHinese(72,4,2);//告警
+		 OLED_ShowCHinese(88,4,3);
 
 
-		OLED_P8x16Str(32,4,":");
-		OLED_P8x16Str(104,4,":");
-		
-	  if(!LED){//显示台灯状态 开/关
-					OLED_P16x16Ch(40,4,4);
+		 OLED_ShowChar(32,4,':',16);
+		 OLED_ShowChar(104,4,':',16);	
 
+		if(!LED){//显示台灯状态 开/关
+				OLED_ShowCHinese(40,4,4);
 		}else{
-					OLED_P16x16Ch(40,4,5);
-
+				OLED_ShowCHinese(40,4,5);
 		}
 		
-		OLED_P16x16Ch(56,4,6);//清屏状态后面的空格
-
 		if(!Buzzer){//显示告警状态 开/关
-					OLED_P16x16Ch(112,4,4);
-
+				OLED_ShowCHinese(112,4,4);
 		}else{
-					OLED_P16x16Ch(112,4,5);
-
+				OLED_ShowCHinese(112,4,5);
 		}
-		OLED_P16x16Ch(112,6,6);//清屏最后状态后面的空格
 
-				
+
 		if(CheckTime==0){
-				OLED_P6x8Str(0,7,"status: CheckTime  ");//connected closed starting
+				OLED_ShowString(0,7,"CheckTime       ",8);
 		}else if(CheckAuth==0){
-				OLED_P6x8Str(0,7,"status: CheckAuth  ");//connected closed starting
+				OLED_ShowString(0,7,"CheckAuth       ",8);
 		}else{
-			  OLED_P6x8Str(0,7,"status: Connected  ");//Connected  Starting
+			  OLED_ShowString(0,7,"Connected       ",8);
 		}
-				
+		
 
-	}
+}
+
 
 unsigned char CheckBCC(unsigned char len, unsigned char *recv){
 	  unsigned char bcc = 0x00;
@@ -395,7 +383,8 @@ void ResponseData(unsigned char len,unsigned char *RES_DATA) {
 		 }
 
 		//刷新一下LED屏幕
-		LEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
+		  OLED_Clear(0);
+		 	OLEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
 	}
 	
 	
@@ -824,7 +813,7 @@ void Timer4_interrupt() interrupt 20    //定时中断入口
 								//重新认证
 								CheckTime = 0;
 								CheckAuth = 0;
-							OLED_P6x8Str(0,7,"status: Closed    ");//Connected closed starting
+								OLED_ShowString(0,7,"Closed          ",8);//connected closed starting
 
 					}
 					

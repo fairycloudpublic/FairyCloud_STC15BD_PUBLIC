@@ -1,0 +1,84 @@
+C51 COMPILER V8.02   DELAY                                                                 06/15/2024 21:16:25 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE DELAY
+OBJECT MODULE PLACED IN ..\hex\delay.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\code\delay.c LARGE OPTIMIZE(8,SPEED) PRINT(.\delay.lst) TABS(2) OBJECT(.
+                    -.\hex\delay.obj)
+
+line level    source
+
+   1          #include "delay.h"
+   2          #include "STC15W4K58S4.h"
+   3          #include <intrins.h>
+   4          
+   5          void Delay50ms()    //@11.0592MHz
+   6          {
+   7   1        unsigned char data i, j, k;
+   8   1      
+   9   1        _nop_();
+  10   1        _nop_();
+  11   1        i = 3;
+  12   1        j = 26;
+  13   1        k = 223;
+  14   1        do
+  15   1        {
+  16   2          do
+  17   2          {
+  18   3            while (--k);
+  19   3          } while (--j);
+  20   2        } while (--i);
+  21   1      }
+  22          void Delay100ms()   //@11.0592MHz
+  23          {
+  24   1        unsigned char data i, j, k;
+  25   1      
+  26   1        _nop_();
+  27   1        _nop_();
+  28   1        i = 5;
+  29   1        j = 52;
+  30   1        k = 195;
+  31   1        do
+  32   1        {
+  33   2          do
+  34   2          {
+  35   3            while (--k);
+  36   3          } while (--j);
+  37   2        } while (--i);
+  38   1      }
+  39          void Delay1000ms()    //@11.0592MHz
+  40          {
+  41   1        unsigned char data i, j, k;
+  42   1      
+  43   1        _nop_();
+  44   1        _nop_();
+  45   1        i = 43;
+  46   1        j = 6;
+  47   1        k = 203;
+  48   1        do
+  49   1        {
+  50   2          do
+  51   2          {
+  52   3            while (--k);
+  53   3          } while (--j);
+  54   2        } while (--i);
+C51 COMPILER V8.02   DELAY                                                                 06/15/2024 21:16:25 PAGE 2   
+
+  55   1      }
+  56          
+  57          
+  58          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     63    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

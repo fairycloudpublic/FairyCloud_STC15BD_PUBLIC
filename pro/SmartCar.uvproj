@@ -387,9 +387,14 @@
               <FilePath>..\code\DHT11.c</FilePath>
             </File>
             <File>
-              <FileName>README.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\code\README.txt</FilePath>
+              <FileName>oled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\OLED\oled.c</FilePath>
+            </File>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\delay.c</FilePath>
             </File>
           </Files>
         </Group>
