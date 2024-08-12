@@ -5,18 +5,34 @@
 #include <string.h>
 
 
-// 1.你的设备CID，17位设备编码
-unsigned char SRCCID[] = {"SXXXXXXXXXXXXXXXX"};
+//----------------WIFI热点名称及密码------------------------
+//WiFi名称
+#define WiFiName "XXXXXXXXXXX"
+//WiFi密码
+#define WiFiPassword "XXXXXXXXXXX"
 
-// 2.填写你的WiFi名称和密码，示例的WiFi名称 Fariy    密码 qwerty123
-unsigned char netConfig[] = "AT+CWJAP=\"Fariy\",\"qwerty123\"\r\n\0";
+//----------------精灵物联网参数------------------------
+//MQTT地址
+#define mqttHostUrl "XXXXXXXXXXX"
+//MQTT端口
+#define port 1883
+//设备CID
+#define DCID "SRCTDSPWU000000XX"
+//MQTT name
+#define DName "SRCTDSPWU000000XX&STC15DB"
+//MQTTclientid---一定注意，中间的逗号前面，自己加两个斜杠！！！
+#define DClientID "16731950792|securemode=2\\,signmethod=hmacsha256\\,timestamp=1723389081212|"
+//MQTT密码
+#define DPassWord "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+//MQTT订阅主题
+#define DSubTopic "server/home/SRCTDSPWU000000XX"
+//MQTT发布主题
+#define DPubTopic "client/home/SRCTDSPWU000000XX"
 
-// 3.填写32位openid，平台管理员直接提供给你！
-unsigned char SRCOPENID[] = {"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
 
-// 4.填写服务器的IP和端口，平台管理员直接提供给你！
-unsigned char TcpServer[] = "AT+CIPSTART=\"TCP\",\"xxxxxxxxxxxxxxxxx\",xxxxx\r\n\0";
-unsigned char SaveTcpServer[] = "AT+SAVETRANSLINK=1,\"xxxxxxxxxxxxxxxxx\",xxxxx,\"TCP\"\r\n\0";
+//Ó²¼þ°æ±¾ºÅÂë
+#define Dversion "1.0.0"
+#define Ddid "75X9T3KR6WJX6PRY76C9AGEBFEAQVG2E"
 
 
 #endif

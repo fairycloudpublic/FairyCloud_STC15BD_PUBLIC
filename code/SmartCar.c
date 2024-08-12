@@ -1,30 +1,15 @@
-/*---------------------------------------------------------------------*/
-/* --- STC MCU Limited ------------------------------------------------*/
-/* --- STC15W4K58S4 ç³»åˆ— å®šæ—¶å™¨1ç”¨ä½œä¸²å£1çš„æ³¢ç‰¹ç‡å‘ç”Ÿå™¨ä¸¾ä¾‹------------*/
-/* --- Mobile: (86)13922805190 ----------------------------------------*/
-/* --- Fax: 86-0513-55012956,55012947,55012969 ------------------------*/
-/* --- Tel: 86-0513-55012928,55012929,55012966-------------------------*/
-/* --- Web: www.STCMCU.com --------------------------------------------*/
-/* --- Web: www.GXWMCU.com --------------------------------------------*/
-/* å¦‚æœè¦åœ¨ç¨‹åºä¸­ä½¿ç”¨æ­¤ä»£ç ,è¯·åœ¨ç¨‹åºä¸­æ³¨æ˜ä½¿ç”¨äº†STCçš„èµ„æ–™åŠç¨‹åº        */
-/* å¦‚æœè¦åœ¨æ–‡ç« ä¸­åº”ç”¨æ­¤ä»£ç ,è¯·åœ¨æ–‡ç« ä¸­æ³¨æ˜ä½¿ç”¨äº†STCçš„èµ„æ–™åŠç¨‹åº        */
-/*---------------------------------------------------------------------*/
+/* ----------------------------------------- ÖØÒªËµÃ÷ -----------------------------------------------------------------*/
+
+/*--1.¡¶¾«ÁéÎïÁªÍø¡·github´úÂëÊÇ×îĞÂµÄ-------------------------------------------------*/
+/*--2.P2^5ÊÇLEDÌ¨µÆ----------------------------------------------------------------------------------------------------*/
+/*--3.P4^1ÊÇBuzzer¸æ¾¯-------------------------------------------------------------------------------------------------*/
+/*--4.OLEDÏÔÊ¾ÆÁµÄÒı½Å¶ÔÓ¦¹ØÏµ  SCL=P2^1; ´®ĞĞÊ±ÖÓ   SDA=P2^0; ´®ĞĞÊı¾İ---ÔÚÍ·ÎÄ¼şOLED.HÖĞ 13 14ĞĞĞŞ¸Ä----------------------*/
+/* ------------------------------Ô¶¿ØÅäºÏÎ¢ĞÅĞ¡³ÌĞò¡¶¾«ÁéÎïÁªÍø¡·--------------------------------------------------------------------------*/
 
 
-
-
-/* ----------------------------------------- é‡è¦è¯´æ˜ -----------------------------------------------------------------*/
-
-/*--1.ã€Šç²¾çµç‰©è”ç½‘ã€‹å¾®ä¿¡è®¢é˜…å·æ–‡ç« å¯èƒ½ä¸æ˜¯æœ€æ–°çš„ï¼Œgithubä»£ç æ‰æ˜¯æœ€æ–°çš„-------------------------------------------------*/
-/*--2.P2^5æ˜¯LEDå°ç¯----------------------------------------------------------------------------------------------------*/
-/*--3.P4^1æ˜¯Buzzerå‘Šè­¦-------------------------------------------------------------------------------------------------*/
-/*--4.OLEDæ˜¾ç¤ºå±çš„å¼•è„šå¯¹åº”å…³ç³»  SCL=P2^1; ä¸²è¡Œæ—¶é’Ÿ   SDA=P2^0; ä¸²è¡Œæ•°æ®---åœ¨å¤´æ–‡ä»¶OLED.Hä¸­ 13 14è¡Œä¿®æ”¹----------------------*/
-/* ------------------------------è¿œæ§é…åˆå¾®ä¿¡å°ç¨‹åºã€Šç²¾çµç‰©è”ç½‘ã€‹--------------------------------------------------------------------------*/
-
-
-/* ------------------------------æ¬¢è¿æŠ€æœ¯äº¤æµ--------------------------------------------------------------------------*/
-/* ---------------------------- QQç¾¤:630017549-------------------------------------------------------------------------*/
-/* -----------------------------å¾®ä¿¡: fairycloud-----------------------------------------------------------------------*/
+/* ------------------------------»¶Ó­¼¼Êõ½»Á÷--------------------------------------------------------------------------*/
+/* ---------------------------- QQÈº:630017549-------------------------------------------------------------------------*/
+/* -----------------------------Î¢ĞÅ: fairycloud2035-----------------------------------------------------------------------*/
 /* -------------------------------QQ:1055417926------------------------------------------------------------------------*/
 
 /* ------------------------------------ END ---------------------------------------------------------------------------*/
@@ -33,21 +18,24 @@
 #include "STC15W4K58S4.h"
 #include "DHT11.h"
 #include "intrins.h"
-#include <string.h>  // å­—ç¬¦ä¸²å¤„ç†å¤´æ–‡ä»¶
-
+#include "stdio.h"
 #include "OLED/oled.h"
 
 #include "config.h"
 #include "delay.h"
 
-sbit LED = P2^5;  // LEDå°ç¯
-sbit Buzzer = P4^1;  // Buzzerèœ‚é¸£å™¨  è®°å¾—ç”¨ä¸€ä¸ªä¸‰æç®¡é©±åŠ¨å“¦
-//ç”¨æˆ·ä½¿ç”¨LEDå’ŒæŒ‰é”®ï¼Œå¯è‡ªè¡Œé…ç½®ä½¿ç”¨
+//µÆºÍ°´Å¥¶¨Òå
+sbit Buzzer = P4^1;  // Buzzer·äÃùÆ÷
+sbit LED = P2^5;  // LEDÌ¨µÆ
 sbit LED2 = P2^6;
 sbit LED3 = P2^7;
 sbit SW1 = P5^3;
 sbit SW2 = P0^5;
 sbit SW3 = P0^6;
+
+u8 xdata RX1_Buffer[450];	//½ÓÊÕ»º³å
+u8	RX1_Cnt;	//½ÓÊÕ¼ÆÊı
+u8 mqtt_message[256];//MQTT·¢ËÍ»º³å
 
 bit busy;
 
@@ -56,27 +44,22 @@ typedef int I16;
 typedef long I32;
 typedef unsigned char U8; 
 
-U8 SRCHeader = 0x23;
+//¼ÇÂ¼Éè±¸µÄËùÓĞ×´Ì¬
+static unsigned char DeviceStatus = 0;
 
-
-U8 xdata DATA_GET[500]={0};//ç¼“å†²åŒºé•¿åº¦
-
-static	  unsigned char   CheckTime = 0;  //æ˜¯å¦å·²å’ŒæœåŠ¡å™¨åŒæ­¥æ—¶é—´    æ ‡è¯†
-static	  unsigned char   CheckAuth = 0; //æ˜¯å¦å·²ç™»é™†éªŒè¯   æ ‡è¯†
-static	 unsigned int xdata  Timestamp[6] = {0x00,0x00,0x00,0x00,0x00,0x00};  //ç”¨æ¥ä¿å­˜æœåŠ¡å™¨çš„æ—¶é—´æ•°æ®
 
 static	  unsigned char   AutoSendMsgFlag = 0;// flag
 
-
-U8 CURRENT_LENGTH=0;
+unsigned int TEMP = 0; 
+unsigned int HUMI = 0; 
 
 static	 unsigned int   Timer4_Count=1;
 static	 unsigned int   Timeout_Count=0;
 static	 unsigned int   DisplayTime_Count=0;
 static   unsigned char i;
 
-#define FOSC 11059200L          //ç³»ç»Ÿé¢‘ç‡
-#define BAUD 115200             //ä¸²å£æ³¢ç‰¹ç‡
+#define FOSC 11059200L          //ÏµÍ³ÆµÂÊ
+#define BAUD 115200             //´®¿Ú²¨ÌØÂÊ
 
 #define S1_S0 0x40              //P_SW1.6
 #define S1_S1 0x80              //P_SW1.7
@@ -84,23 +67,24 @@ static   unsigned char i;
 
 void DELAY_MS(unsigned int timeout);		//@11.0592MHz   1ms
 void DELAY_1MS() ;
-void UART_TC (unsigned char *str);
-void UART_T (unsigned char UART_data); //å®šä¹‰ä¸²å£å‘é€æ•°æ®å˜é‡
-void UART_R();//æ¥å—æ•°æ®
-void ConnectServer();//è¿æ¥æœåŠ¡å™¨
-void ReConnectServer();//é‡å¯WIFIè¿æ¥æœåŠ¡å™¨
-void USART_Init();
+void UART_TC (unsigned char *str);//µ÷ÓÃÏÂÃæµÄUART_T·¢ËÍ
+void UART_T (unsigned char UART_data); //¶¨Òå´®¿Ú·¢ËÍÊı¾İ±äÁ¿
+void UART_R();//½ÓÊÜÊı¾İ
+void ReConnectServer();//ÖØÆôWIFIÁ¬½Ó·şÎñÆ÷
+void USART1_Init();
 void Device_Init();
-void SendAckData(U8 len, unsigned char *RES_DATA);
 void Timer4Init();
-unsigned char CheckBCC(unsigned char len, unsigned char *recv);
-void ResponseData(unsigned char len,unsigned char *RES_DATA);
 void Buzzer_Actions_Status(unsigned char status);
 void Led_Actions_Status(unsigned char status);
 
 void Timer0Init(void);
 void OLEDFunc(unsigned char TEMP,unsigned char HUMI);
 void AutoSendMsg();
+void CloudHandleReceive(void);
+
+void ESP8266_SmartConnect();
+void Enter_ErrorMode(U8 mode);
+
 
 
 void main(){
@@ -121,79 +105,63 @@ void main(){
     P7M0 = 0x00;
     P7M1 = 0x00;
 		
-		Device_Init();//åˆå§‹åŒ–ç¡¬ä»¶
+		Device_Init();//³õÊ¼»¯Ó²¼ş
 
 
 		OLED_Init();
 	  OLED_Clear(0);
 
 		OLEDFunc(0,0);
+			OLED_ShowString(0,0,"0000/00/00 00:00",16);
 
 		OLED_ShowString(0,7,"Starting        ",8);//connected closed starting
 
 
-    USART_Init();//åˆå§‹åŒ–ä¸WiFié€šä¿¡çš„ä¸²å£
-		
-		if(PCON&0x10){	//å¦‚æœæ˜¯ç¡¬å¯åŠ¨(ä¸Šç”µå¯åŠ¨)çš„è¯ï¼Œå°±è¿›è¡ŒWiFiçš„ç¬¬ä¸€æ¬¡åˆå§‹åŒ–æ“ä½œï¼Œè‹¥æ˜¯çƒ­å¯åŠ¨ï¼ˆå¤ä½å¯åŠ¨æˆ–çœ‹é—¨ç‹—å¯åŠ¨ï¼‰çš„è¯ç›´æ¥è·³è¿‡ï¼›å› ä¸ºWiFiåœ¨ç¬¬ä¸€æ¬¡åˆå§‹åŒ–çš„æ—¶å€™ï¼Œå°±è¿›è¡Œäº†â€œ ä¿å­˜TCPè¿æ¥åˆ°flashï¼Œå®ç°ä¸Šç”µé€ä¼ â€
+    USART1_Init();//³õÊ¼»¯ÓëWiFiÍ¨ĞÅµÄ´®¿Ú
+
+		if(PCON&0x10){	//Èç¹ûÊÇÓ²Æô¶¯(ÉÏµçÆô¶¯)µÄ»°£¬¾Í½øĞĞWiFiµÄµÚÒ»´Î³õÊ¼»¯²Ù×÷£¬ÈôÊÇÈÈÆô¶¯£¨¸´Î»Æô¶¯»ò¿´ÃÅ¹·Æô¶¯£©µÄ»°Ö±½ÓÌø¹ı£»ÒòÎªWiFiÔÚµÚÒ»´Î³õÊ¼»¯µÄÊ±ºò£¬¾Í½øĞĞÁË¡° ±£´æTCPÁ¬½Óµ½flash£¬ÊµÏÖÉÏµçÍ¸´«¡±
 			PCON&=0xef;
-			ConnectServer();
+			ReConnectServer();
+			ESP8266_SmartConnect();
 		}
 
 				
 		Timer4Init();
 		Timer0Init();
 
-	  WDT_CONTR = 0x06;       //çœ‹é—¨ç‹—å®šæ—¶å™¨æº¢å‡ºæ—¶é—´è®¡ç®—å…¬å¼: (12 * 32768 * PS) / FOSC (ç§’)
-                            //è®¾ç½®çœ‹é—¨ç‹—å®šæ—¶å™¨åˆ†é¢‘æ•°ä¸º32,æº¢å‡ºæ—¶é—´å¦‚ä¸‹:
+	  WDT_CONTR = 0x06;       //¿´ÃÅ¹·¶¨Ê±Æ÷Òç³öÊ±¼ä¼ÆËã¹«Ê½: (12 * 32768 * PS) / FOSC (Ãë)
+                            //ÉèÖÃ¿´ÃÅ¹·¶¨Ê±Æ÷·ÖÆµÊıÎª32,Òç³öÊ±¼äÈçÏÂ:
                             //11.0592M : 1.14s
                             //18.432M  : 0.68s
                             //20M      : 0.63s
-    WDT_CONTR |= 0x20;      //å¯åŠ¨çœ‹é—¨ç‹—  STCå•ç‰‡æœºçš„çœ‹é—¨ç‹—ä¸€æ—¦å¯åŠ¨åï¼Œå°±æ²¡æ³•å…³é—­
+    WDT_CONTR |= 0x20;      //Æô¶¯¿´ÃÅ¹·  STCµ¥Æ¬»úµÄ¿´ÃÅ¹·Ò»µ©Æô¶¯ºó£¬¾ÍÃ»·¨¹Ø±Õ
 
     while(1) {
-			WDT_CONTR |= 0x10;  //å–‚ç‹—ç¨‹åº
+			WDT_CONTR |= 0x10;  //Î¹¹·³ÌĞò
 			
-			if(DHT11_Read_Data(&DATA_Temphui[0],&DATA_Temphui[1])==0)//æ¸©æ¹¿åº¦æ£€æµ‹
+			if(DHT11_Read_Data(&DATA_Temphui[0],&DATA_Temphui[1])==0)//ÎÂÊª¶È¼ì²â
 			{
 				
 				  DATA_Temphui[2]=1;	 
+				  TEMP = DATA_Temphui[0];
+				  HUMI = DATA_Temphui[1];
 					OLEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
 			}
 			
 			if(AutoSendMsgFlag == 1)
 			{
 				AutoSendMsgFlag=0;
-				AutoSendMsg();
+				AutoSendMsg( );
 
       }
     }
 }
 
-//OLEDå±å¹•æ˜¾ç¤º
+//OLEDÆÁÄ»ÏÔÊ¾
 void OLEDFunc(unsigned char TEMP,unsigned char HUMI){
+			//OLED_ShowString(0,0,"0000/00/00 00:00",16);
 	
-		OLED_ShowChar(0,0,'0'+Timestamp[1]/10%10,16); //æœˆ
-	  OLED_ShowChar(8,0,'0'+Timestamp[1]%10,16);		
-		OLED_ShowChar(16,0,'/',16);
-		
-		OLED_ShowChar(24,0,'0'+Timestamp[2]/10%10,16); //æ—¥
-	  OLED_ShowChar(32,0,'0'+Timestamp[2]%10,16);		
-		
-		OLED_ShowChar(64,0,'0'+Timestamp[3]/10%10,16); //æ—¶
-	  OLED_ShowChar(72,0,'0'+Timestamp[3]%10,16);		
-		OLED_ShowChar(80,0,':',16);
-		
-		OLED_ShowChar(88,0,'0'+Timestamp[4]/10%10,16); //åˆ†
-	  OLED_ShowChar(96,0,'0'+Timestamp[4]%10,16);		
-		OLED_ShowChar(104,0,':',16);
-		
-		OLED_ShowChar(112,0,'0'+Timestamp[5]/10%10,16); //ç§’
-	  OLED_ShowChar(120,0,'0'+Timestamp[5]%10,16);	
-
-
-	
-	
-	//æ¸©æ¹¿åº¦æ˜¾ç¤º
+	//ÎÂÊª¶ÈÏÔÊ¾
 		OLED_ShowString(0,2,"Temp:",16);
 		OLED_ShowString(72,2,"Humi:",16);
 		
@@ -204,237 +172,77 @@ void OLEDFunc(unsigned char TEMP,unsigned char HUMI){
 
 
 	
-		 OLED_ShowCHinese(0,4,0);//å°ç¯
+		 OLED_ShowCHinese(0,4,0);//Ì¨µÆ
 		 OLED_ShowCHinese(16,4,1);
 
-		 OLED_ShowCHinese(72,4,2);//å‘Šè­¦
+		 OLED_ShowCHinese(72,4,2);//¸æ¾¯
 		 OLED_ShowCHinese(88,4,3);
 
 
 		 OLED_ShowChar(32,4,':',16);
 		 OLED_ShowChar(104,4,':',16);	
 
-		if(!LED){//æ˜¾ç¤ºå°ç¯çŠ¶æ€ å¼€/å…³
+		if(!LED){//ÏÔÊ¾Ì¨µÆ×´Ì¬ ¿ª/¹Ø
 				OLED_ShowCHinese(40,4,4);
 		}else{
 				OLED_ShowCHinese(40,4,5);
 		}
 		
-		if(!Buzzer){//æ˜¾ç¤ºå‘Šè­¦çŠ¶æ€ å¼€/å…³
+		if(!Buzzer){//ÏÔÊ¾¸æ¾¯×´Ì¬ ¿ª/¹Ø
 				OLED_ShowCHinese(112,4,4);
 		}else{
 				OLED_ShowCHinese(112,4,5);
 		}
 
-
-		if(CheckTime==0){
-				OLED_ShowString(0,7,"CheckTime       ",8);
-		}else if(CheckAuth==0){
-				OLED_ShowString(0,7,"CheckAuth       ",8);
+//Òì³£×´Ì¬ÏÔÊ¾
+		if(DeviceStatus==0){
+				OLED_ShowString(0,7,"OK              ",8);
 		}else{
-			  OLED_ShowString(0,7,"Connected       ",8);
+			Enter_ErrorMode(DeviceStatus);
 		}
 		
 
 }
 
 
-unsigned char CheckBCC(unsigned char len, unsigned char *recv){
-	  unsigned char bcc = 0x00;
-		unsigned char i=0;
-    for(i=0;i<len-1;i++)
-    {
-        bcc^=recv[i];
-    };
-    return bcc;
-
-}
-
-void ResponseData(unsigned char len,unsigned char *RES_DATA) {
-	
-	if(len <26){
-		return ;
-	}
-
-
-//æ ¡éªŒå’Œ
-	if(CheckBCC(len, RES_DATA) == RES_DATA[len-1]){
-	
-		 unsigned int dataCmdFlag =(RES_DATA[2] << 8) | RES_DATA[3];         //å‘½ä»¤æ ‡è¯†
-		 unsigned char dataCmdAck = RES_DATA[4];          //åº”ç­”æ ‡è¯†
-		 unsigned char j=0;
-		 unsigned char dataEncryptFlag = RES_DATA[22];    //åŠ å¯†æ–¹å¼
-		 unsigned char dataUintLength = (RES_DATA[23] << 8) | RES_DATA[24];  //æ•°æ®é•¿åº¦
-
-	 //æ ¡éªŒCIDæ˜¯å¦æ­£ç¡®
-		 for(j=5;j<22;j++){
-			  if(SRCCID[j-5] != RES_DATA[j]){
-				 return;
-			 }
-		 }
-		
-		 //æ ¡éªŒé•¿åº¦æ˜¯å¦æ­£ç¡®
-		 if ((26 + dataUintLength) != len) {
-				return ;
-		 }
-		 
-		 Timeout_Count = 0;//å°†æœ¬åœ°çš„30sé‡è¿è®¡æ•°æ¸…é›¶
-		 
-
-		 
-		 if(dataCmdFlag == 0x8001){//è¿æ¥è®¤è¯
-			  if(RES_DATA[31] == 0x7E){//åŒæ­¥æ—¶é—´ç»“æœ
-			  	unsigned char j=0;
-					 for(j=0;j<6;j++){
-						Timestamp[j] = RES_DATA[j+32];
-				 }
-					 
-					 Timestamp[0] = Timestamp[0] ;
-					 CheckTime = 1;
-		 
-		    }else  if(RES_DATA[31] == 0x01){//è¿æ¥è®¤è¯ç»“æœ
-					 
-					 CheckAuth = 1;
-		    }
-			 
-			 
-		 }else if(dataCmdFlag ==0x8002){//å®æ—¶ä¿¡æ¯ä¸»åŠ¨ä¸ŠæŠ¥
-			 
-		 }else if(dataCmdFlag ==0x8003){//è¡¥å‘
-			 
-		 }else if(dataCmdFlag ==0x8004){//è®¾å¤‡ç™»å‡º
-			 
-		 }else if(dataCmdFlag ==0x8005){//å¿ƒè·³
-			 
-		 }else if(dataCmdFlag ==0x8006){//è¿œç¨‹æ§åˆ¶
-
-			 if(RES_DATA[31] == 0x02){//åŸºç¡€æ•°æ®æŸ¥è¯¢	æ¸©åº¦ã€æ¹¿åº¦ã€å°ç¯ã€å‘Šè­¦ï¼›è¯·è§ã€ä¿¡æ¯ä½“å®šä¹‰ã€‘
-		 
-				 
-			 }else if(RES_DATA[31] == 0x03){//åŸºç¡€æ§åˆ¶	å°ç¯ã€å‘Šè­¦ï¼›è¯·è§ã€ä¿¡æ¯ä½“å®šä¹‰ã€‘
-
-				 //å°ç¯ï¼š0X02ï¼Œ0X02å¼€å¯ï¼›0X01å…³é—­ï¼›
-         //å‘Šè­¦ï¼š0X03ï¼Œ0X02å¼€å¯ï¼›0X01å…³é—­ï¼›
-				 
-					 unsigned char sensor = RES_DATA[32];
-					 unsigned char cmd = RES_DATA[33];
-					if(sensor==0x02){
-							 if( cmd==0x02){
-									Led_Actions_Status(0);//å¼€å¯
-								}else if( cmd==0x01){
-									Led_Actions_Status(1);//å…³é—­
-								}
-					}else if(sensor==0x03){
-						
-							 if( cmd==0x02){
-									Buzzer_Actions_Status(0);//å¼€å¯
-							 }else if( cmd==0x01){
-									Buzzer_Actions_Status(1);//å…³é—­
-							 }
-					 
-				 }
-					 
-					 
-					RES_DATA[0] = 0X23;
-					RES_DATA[1] = 0X23;
-					RES_DATA[2] = 0X10;
-					RES_DATA[3] = 0X06;
-
-					if(dataCmdAck == 0xFE){
-						RES_DATA[4] = 0x01;//æˆåŠŸ
-					
-					}
-					if(dataCmdAck == 0xFE){//åº”ç­”æ ‡è¯†
-						RES_DATA[4] = 0x01;//æˆåŠŸ
-						
-					}
-			
-				 for(j=0;j<17;j++){//CIDèµ‹å€¼
-						RES_DATA[j+5] = SRCCID[j];
-				 }
-				RES_DATA[22] = 0X01;//ä¸åŠ å¯†
-				RES_DATA[23] = 0X00;//é•¿åº¦ä¸¤ä½ é«˜ä½00
-				RES_DATA[24] = 0X09;//ä½ä½09 ä¸€å…±9ä½    6ä½çš„æ—¶é—´+1ä½çš„å‘½ä»¤æ ‡è¯† + 2ä½çš„æ•°æ®
-
-				RES_DATA[25] = Timestamp[0];//å¹´ 0x14+2000 = 2020 
-				RES_DATA[26] = Timestamp[1];//æœˆ 
-				RES_DATA[27] = Timestamp[2];//æ—¥ 
-				RES_DATA[28] = Timestamp[3];//æ—¶ 
-				RES_DATA[29] = Timestamp[4];//åˆ†
-				RES_DATA[30] = Timestamp[5];//ç§’
-				
-				RES_DATA[31] = 0X03;//åŸºç¡€æ§åˆ¶  å°ç¯ã€å‘Šè­¦ï¼›è¯·è§ã€ä¿¡æ¯ä½“å®šä¹‰ã€‘
-				
-//				RES_DATA[32] = RES_DATA[32];// è¿™ä¸¤ä½ä¸ç”¨æ”¹åŠ¨  
-//				RES_DATA[33] = RES_DATA[33];
-				
-				
-						RES_DATA[len-1] = CheckBCC(len, RES_DATA);//è¿™ä¸€å¸§æ•°æ® 35ä¸ªå­—èŠ‚ len=35
-						SendAckData(len,RES_DATA);
-
-			 
-			 }else if(RES_DATA[31] == 0x7F){//é‡å¯
-				 	IAP_CONTR = 0X20;
-			 }
-			 
-			 
-			 	AutoSendMsgFlag = 1;
-			 
-		 }
-
-		//åˆ·æ–°ä¸€ä¸‹LEDå±å¹•
-		  OLED_Clear(0);
-		 	OLEDFunc(DATA_Temphui[0],DATA_Temphui[1]);
-	}
-	
-	
-	
-}
-
-
 void AutoSendMsg(){
-			unsigned char light_status = (LED==1) ? 0x01 : 0x02;    //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
-			unsigned char buzzy_status = (Buzzer==1) ? 0x01 : 0x02;  //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
-			unsigned char xdata ds[37] = {0}; 
-			unsigned char dslen =37;
-			unsigned char j=0;
+	
+	   unsigned char *strLED ;
+	   unsigned char *strBuzzer ;
+	
+		 //Ë¢ĞÂÒ»ÏÂLEDÆÁÄ»
+		OLED_Init();
+		OLED_Clear(0);
+	
+		if(!LED){//ÏÔÊ¾Ì¨µÆ×´Ì¬ ¿ª/¹Ø
+				strLED = "open";
+		}else{
+				strLED = "close";
+		}
 		
-			ds[0] = 0X23;//æ•°æ®å¤´
-			ds[1] = 0X23;
-			ds[2] = 0X10;//å‘½ä»¤æ ‡è¯†  ä¸‹å‘0x8006  å¯¹äºçš„ä¸Šä¼ æ˜¯0x1006
-			ds[3] = 0X06;
-			
-			ds[4] = 0x01;//æˆåŠŸ
-				
-
-		 for(j=0;j<17;j++){//CIDèµ‹å€¼
-				ds[j+5] = SRCCID[j];
-		 }
-		ds[22] = 0X01;//ä¸åŠ å¯†
-		ds[23] = 0X00;//é•¿åº¦ä¸¤ä½ é«˜ä½00
-		ds[24] = 0X0B;//ä½ä½0B ä¸€å…±11ä½
-
-		ds[25] = Timestamp[0];//å¹´ 0x14+2000 = 2020 
-		ds[26] = Timestamp[1];//æœˆ 
-		ds[27] = Timestamp[2];//æ—¥ 
-		ds[28] = Timestamp[3];//æ—¶ 
-		ds[29] = Timestamp[4];//åˆ†
-		ds[30] = Timestamp[5];//ç§’
+		if(!Buzzer){//ÏÔÊ¾¸æ¾¯×´Ì¬ ¿ª/¹Ø
+				strBuzzer = "open";
+		}else{
+				strBuzzer = "close";
+		}
 		
-		ds[31] = 0X02;//åŸºç¡€æŸ¥è¯¢   ç¼–ç 
+		
 
 
-			ds[32] = DATA_Temphui[0]; //åŸºç¡€æ•°æ®4ä¸ªå­—èŠ‚çš„æ•°æ®
-			ds[33] = DATA_Temphui[1];
-			ds[34] = light_status;
-			ds[35] = buzzy_status;
-			
+			//×¢ÒâÊı¾İ³¤¶È²»Òª³¬¹ımqtt_messageµÄ256 Ä¿Ç°ÊÇ219
+			sprintf(mqtt_message,"AT+MQTTPUB=0,\"%s\",\"{\\\"cmdtype\\\":\\\"cmd_status\\\"\\\,\\\"datatype\\\":\\\"dictionary\\\"\\\,\\\"cid\\\":\\\"%s\\\"\\\,\\\"temperature\\\":%d\\\,\\\"humidity\\\":%d\\\,\\\"led\\\":\\\"%s\\\"\\\,\\\"alarm\\\":\\\"%s\\\"\\\,\\\"version\\\":\\\"%s\\\"\}\",0,0\r\n\0",DPubTopic,DCID,TEMP,HUMI,strLED,strBuzzer,Dversion);
+			UART_TC(mqtt_message);
+			memset(mqtt_message,0,256);
 
-			
-		 ds[dslen-1] = CheckBCC(dslen, ds);//è®¡ç®—æ ¡éªŒå’Œ  æ”¾æœ€åä¸€ä½
-				SendAckData(dslen,ds);
-
-				 
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}
+			else 
+			{
+				Enter_ErrorMode(6);
+			}		
 }
 
 
@@ -466,7 +274,7 @@ void DELAY_MS(unsigned int timeout)		//@11.0592MHz
 
 
 
-//åˆå§‹åŒ–LEDå°ç¯å’ŒBuzzerå‘Šè­¦ //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
+//³õÊ¼»¯LEDÌ¨µÆºÍBuzzer¸æ¾¯ //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
 void Device_Init() {
 
     LED = 1;
@@ -474,38 +282,31 @@ void Device_Init() {
 }
 
 
-void USART_Init()
+void USART1_Init()
 {
-
-//   ACC = P_SW1;
-//    ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=0
-//    P_SW1 = ACC;                //(P3.0/RxD, P3.1/TxD)
 
     ACC = P_SW1;
     ACC &= ~(S1_S0 | S1_S1);    //S1_S0=1 S1_S1=0
     ACC |= S1_S0;               //(P3.6/RxD_2, P3.7/TxD_2)
     P_SW1 = ACC;
-    SCON = 0x50;                //8ä½å¯å˜æ³¢ç‰¹ç‡
+    SCON = 0x50;                //8Î»¿É±ä²¨ÌØÂÊ
     PS = 1;
 		
-//  ACC = P_SW1;
-//  ACC &= ~(S1_S0 | S1_S1);    //S1_S0=0 S1_S1=1
-//  ACC |= S1_S1;               //(P1.6/RxD_3, P1.7/TxD_3)
-//  P_SW1 = ACC;
-
-
-    AUXR = 0x40;                //å®šæ—¶å™¨1ä¸º1Tæ¨¡å¼
-    TMOD = 0x00;                //å®šæ—¶å™¨1ä¸ºæ¨¡å¼0(16ä½è‡ªåŠ¨é‡è½½)
-    TL1 = (65536 - (FOSC/4/BAUD));   //è®¾ç½®æ³¢ç‰¹ç‡é‡è£…å€¼
+	
+    AUXR = 0x40;                //¶¨Ê±Æ÷1Îª1TÄ£Ê½
+    TMOD = 0x00;                //¶¨Ê±Æ÷1ÎªÄ£Ê½0(16Î»×Ô¶¯ÖØÔØ)
+    TL1 = (65536 - (FOSC/4/BAUD));   //ÉèÖÃ²¨ÌØÂÊÖØ×°Öµ
     TH1 = (65536 - (FOSC/4/BAUD))>>8;
-    TR1 = 1;                    //å®šæ—¶å™¨1å¼€å§‹å¯åŠ¨
-    ES = 1;                     //ä½¿èƒ½ä¸²å£ä¸­æ–­
+    TR1 = 1;                    //¶¨Ê±Æ÷1¿ªÊ¼Æô¶¯
+    ES = 1;                     //Ê¹ÄÜ´®¿ÚÖĞ¶Ï
     EA = 1;
 
 }
 
+
+
 /*----------------------------
-UART ä¸­æ–­æœåŠ¡ç¨‹åº
+UART ÖĞ¶Ï½ÓÊÕ·şÎñ³ÌĞò
 -----------------------------*/
 void Uart() interrupt 4 using 1
 {
@@ -520,346 +321,140 @@ void Uart() interrupt 4 using 1
     if (TI)
     {
         while(!TI);
-        TI = 0;                 //æ¸…é™¤TIä½
-        busy = 0;               //æ¸…å¿™æ ‡å¿—
+        TI = 0;                 //Çå³ıTIÎ»
+        busy = 0;               //ÇåÃ¦±êÖ¾
     }
 }
 
+//´®¿Ú  ½ÓÊÕESP8266µÄ´®¿ÚÊı¾İ£¬²¢Ğ£ÑéÊı¾İµÄÍêÕûĞÔ9Î»
 
-void UART_T (unsigned char UART_data) { //å®šä¹‰ä¸²å£å‘é€æ•°æ®å˜é‡
-    SBUF = UART_data;	//å°†æ¥æ”¶çš„æ•°æ®å‘é€å›å»
-    while(!TI);		//æ£€æŸ¥å‘é€ä¸­æ–­æ ‡å¿—ä½
-    TI = 0;			//ä»¤å‘é€ä¸­æ–­æ ‡å¿—ä½ä¸º0ï¼ˆè½¯ä»¶æ¸…é›¶ï¼‰
+void UART_R()
+{
+	TL0 = 0x00;		//ÉèÖÃ¶¨Ê±³õÖµ
+	TH0 = 0xDC;		//ÉèÖÃ¶¨Ê±³õÖµ
+	TF0 = 0;		//Çå³ıTF0±êÖ¾
+	TR0 = 1;		//¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
+	ET0 = 1;	//ÔÊĞíÖĞ¶Ï
+	
+	
+	RX1_Buffer[RX1_Cnt] = SBUF;
+	if(++RX1_Cnt >= 450)	RX1_Cnt = 0;
+
 }
 
 
+//´®¿Ú·¢ËÍÊı¾İ×Ö·ûÊı×éÓöµ½\0Í£Ö¹
+
 void UART_TC (unsigned char *str) {
+	 EA = 0;
     while(*str != '\0') {
         UART_T(*str);
         *str++;
     }
     *str = 0;
+		 EA = 1;
 }
 
-
-//ä¸²å£  æ¥æ”¶ESP8266çš„ä¸²å£æ•°æ®ï¼Œå¹¶æ ¡éªŒæ•°æ®çš„å®Œæ•´æ€§9ä½
-
-void UART_R()
-{
-		TL0 = 0x00;		//è®¾ç½®å®šæ—¶åˆå€¼
-	TH0 = 0xDC;		//è®¾ç½®å®šæ—¶åˆå€¼
-	TF0 = 0;		//æ¸…é™¤TF0æ ‡å¿—
-	TR0 = 1;		//å®šæ—¶å™¨0å¼€å§‹è®¡æ—¶
-	ET0 = 1;	//å…è®¸ä¸­æ–­
-	
-	
-
-	 DATA_GET[CURRENT_LENGTH]=SBUF;
-	 CURRENT_LENGTH++;
-	
-	
-
+void UART_T (unsigned char UART_data) { //¶¨Òå´®¿Ú·¢ËÍÊı¾İ±äÁ¿
+    SBUF = UART_data;	//½«½ÓÊÕµÄÊı¾İ·¢ËÍ»ØÈ¥
+    while(!TI);		//¼ì²é·¢ËÍÖĞ¶Ï±êÖ¾Î»
+    TI = 0;			//Áî·¢ËÍÖĞ¶Ï±êÖ¾Î»Îª0£¨Èí¼şÇåÁã£©
 }
 
 
 
-void SendAckData(U8 len, unsigned char *RES_DATA) {
-	
-		unsigned int i=0;
-    for(i=0; i<len; i++)
-    {
-				 
-				SBUF=RES_DATA[i];
-				while(!TI);		//æ£€æŸ¥å‘é€ä¸­æ–­æ ‡å¿—ä½
-					TI = 0;	
-		}
-}
-
-//é‡å¯ ESP8266WiFiæ¨¡å—
+//ÖØÆô ESP8266WiFiÄ£¿é
 void ReConnectServer() {
 
-    UART_TC("+++\0"); // é€€å‡ºé€ä¼ æ¨¡å¼
-		 DELAY_MS( 1000);
-    UART_TC("AT+RST\r\n\0");  // å¤ä½
-		
-
-		
+    UART_TC("AT+RST\r\n\0");  // ¸´Î»
+			
 }
 
-//åˆå§‹åŒ–ESP8266WiFiæ¨¡å—ï¼Œå¹¶è¿æ¥åˆ°æœåŠ¡å™¨
-void ConnectServer() {
-
-    DELAY_MS( 1000);
-
-    UART_TC("+++\0"); // é€€å‡ºé€ä¼ æ¨¡å¼
-    DELAY_MS( 1000);
-		
-		UART_TC("AT+CWMODE=1\r\n\0"); // è¿™æ˜¯è®¾ç½®STAæ¨¡å¼
-    DELAY_MS( 2500);
-		
-    UART_TC("AT+CIPMUX=0\r\n\0");  // è®¾ç½®å•è¿æ¥æ¨¡å¼
-    DELAY_MS(1000);
-
-    UART_TC(netConfig);  // è¿™ä¸€æ­¥ä¾¿æ˜¯è¿æ¥wifiï¼Œå»¶æ—¶çš„æ—¶é—´è¦é•¿ä¸€äº›ï¼Œå¦åˆ™ä¼šç­‰ä¸åˆ°è¿”å›çš„ä¿¡æ¯ã€‚10s
-    DELAY_MS(15000);
-
-
-    UART_TC(TcpServer);	// è¿æ¥åˆ°æŒ‡å®šTCPæœåŠ¡å™¨182.92.238.186
-    DELAY_MS( 5000);
-
-    UART_TC("AT+CIPMODE=1\r\n\0"); // è®¾ç½®é€ä¼ æ¨¡å¼
-    DELAY_MS( 2000);
-
-   UART_TC(SaveTcpServer); // ä¿å­˜TCPè¿æ¥åˆ°flashï¼Œå®ç°ä¸Šç”µé€ä¼ 
-   DELAY_MS(1000);
-
-    UART_TC("AT+CIPSEND\r\n\0");	 // è¿›å…¥é€ä¼ æ¨¡å¼ å‡†å¤‡æ¨¡å—ä¸ç”µè„‘è¿›è¡Œäº’ä¼ æ•°æ®
-    DELAY_MS( 1000);
-		
-		
-
-}
 
 void Timer4Init(void)		
 {
-	//50 æ¯«ç§’@11.0592MHz
-	T4T3M &= 0xDF;		//å®šæ—¶å™¨æ—¶é’Ÿ12Tæ¨¡å¼
-	T4L = 0x00;		//è®¾ç½®å®šæ—¶åˆå€¼
-	T4H = 0x4C;		//è®¾ç½®å®šæ—¶åˆå€¼
-	T4T3M |= 0x80;		//å®šæ—¶å™¨4å¼€å§‹è®¡æ—¶
+		//50 ºÁÃë@11.0592MHz
+		T4T3M &= 0xDF;		//¶¨Ê±Æ÷Ê±ÖÓ12TÄ£Ê½
+		T4L = 0x00;		//ÉèÖÃ¶¨Ê±³õÖµ
+		T4H = 0x4C;		//ÉèÖÃ¶¨Ê±³õÖµ
+		T4T3M |= 0x80;		//¶¨Ê±Æ÷4¿ªÊ¼¼ÆÊ±
 	
-		IE2 |= 0x40;		//å¼€å®šæ—¶å™¨4ä¸­æ–­
-		EA=1; 	//æ€»ä¸­æ–­å¼€å¯
+		IE2 |= 0x40;		//¿ª¶¨Ê±Æ÷4ÖĞ¶Ï
+		EA=1; 	//×ÜÖĞ¶Ï¿ªÆô
+}
+
+//10sÖĞ¶Ï×Ô¶¯ÉÏ±¨ĞÅÏ¢
+void Timer4_interrupt() interrupt 20    //¶¨Ê±ÖĞ¶ÏÈë¿Ú
+	{
+		
+		if(DisplayTime_Count>=20){  //20 * 50ms = 1s
+			DisplayTime_Count = 0;
+			
+			
+		}else{
+			 DisplayTime_Count++;//Ã¿¼ÓÒ»´Î¼Ó50ms
+		}
+				
+		if(Timer4_Count>=200){  //200 * 50ms = 10s
+			AutoSendMsgFlag = 1;
+			Timer4_Count = 0;
+
+//				Timeout_Count++;//Ã¿¼ÓÒ»´Î¼Ó10s
+//				
+//				if(Timeout_Count < 3 ){ //Ã»ÓĞÈÏÖ¤³É¹¦·¢ÁË·şÎñÆ÷Ò²»á¾Ü¾ø
+//					//  AutoSendMsgFlag = 1;
+
+//				}else if(Timeout_Count >= 3){//30s»¹ÊÇÊÕ²»µ½·şÎñÆ÷·µ»ØµÄÊı¾İ£¬Ôò ÖØÆô»úÆ÷
+//						//ÖØĞÂÁ´½ÓÆ½Ì¨
+//					//ReConnectServer();
+//					Timeout_Count = 0;
+//					OLED_ShowString(0,7,"Closed          ",8);//connected closed starting
+
+//				}
+						
+		}else{
+						
+				Timer4_Count++;
+		}
+					
+
+		
 }
 
 
-//10sä¸­æ–­è‡ªåŠ¨ä¸ŠæŠ¥ä¿¡æ¯
-void Timer4_interrupt() interrupt 20    //å®šæ—¶ä¸­æ–­å…¥å£
+
+
+
+
+void Timer0Init(void)		//10ºÁÃë@11.0592MHz
 {
-	
-
-	
-	if(DisplayTime_Count>=20){  //20 * 50ms = 1s
-		DisplayTime_Count = 0;
-		
-		if(CheckTime==1){  //å·²ç»åŒæ­¥è¿‡æœåŠ¡å™¨æ—¶é—´å
-			
-			Timestamp[5] =  Timestamp[5] + 1;//ç§’
-			
-			if(Timestamp[5]>=60){
-				Timestamp[5] = 0;
-				Timestamp[4] = Timestamp[4] + 1;//åˆ†
-				
-				if(Timestamp[4]>=60){
-					Timestamp[4] = 0;
-					Timestamp[3] = Timestamp[3] + 1;//å°æ—¶
-					
-					if(Timestamp[3]>=24){
-						Timestamp[3] = 0;
-						Timestamp[2] = Timestamp[2] + 1;//å¤©
-						
-						if( ((Timestamp[1] == 4 || Timestamp[1] == 6 || Timestamp[1] == 9 || Timestamp[1] == 11) && Timestamp[2]>=30) || ((Timestamp[1] == 1 || Timestamp[1] == 3 || Timestamp[1] == 5 || Timestamp[1] == 7 || Timestamp[1] == 8 || Timestamp[1] == 10 || Timestamp[1] == 12) && Timestamp[2]>=31) || ((((Timestamp[0] % 4 == 0 && Timestamp[0] % 100 != 0) || Timestamp[0] % 400 == 0) == 1  && Timestamp[2]>=29 ) ||  (((Timestamp[0] % 4 == 0 && Timestamp[0] % 100 != 0) || Timestamp[0] % 400 == 0) == 1  && Timestamp[2]>=28) ) ){
-							Timestamp[2] = 1;
-							Timestamp[1] = Timestamp[1] + 1;//æœˆ
-							
-							if(Timestamp[1]>=13){
-								Timestamp[1] = 1;
-								Timestamp[0] = Timestamp[0] + 1;//å¹´
-							 }
-							
-						 }
-						
-				 	}
-					
-			 	}	
-				
-		 	 }
-			
-	  	}
-		
-		
-		
-				if(CheckTime==0){//è®¾å¤‡åŒæ­¥æ—¶é—´
-					
-							unsigned char j=0;
-							U8 xdata RES_DATA[65]= {0};
-							unsigned char RES_LEN= 65;
-							
-							RES_DATA[0] = 0X23;//æ•°æ®å¤´
-							RES_DATA[1] = 0X23;
-							RES_DATA[2] = 0X10;//å‘½ä»¤æ ‡è¯†  ä¸‹å‘0x8006  å¯¹äºçš„ä¸Šä¼ æ˜¯0x1006
-							RES_DATA[3] = 0X01;
-							RES_DATA[4] = 0xFE;//åº”ç­”æ ‡è¯†
-								
-						 for(j=0;j<17;j++){//CIDèµ‹å€¼
-								RES_DATA[j+5] = SRCCID[j];
-						 }
-						 
-						RES_DATA[22] = 0X01;//ä¸åŠ å¯†
-						RES_DATA[23] = 0X00;//é•¿åº¦ä¸¤ä½ é«˜ä½00
-						RES_DATA[24] = 0X27;//ä½ä½0x27 
-
-						for(j=0;j<6;j++){//Timestamp
-								RES_DATA[j+25] = Timestamp[j];
-						 }
-					
-						
-						RES_DATA[31] = 0X7E;//åŒæ­¥æ—¶é—´
-
-						for(j=0;j<32;j++){//openid
-								RES_DATA[j+32] = SRCOPENID[j];
-						 }
-					
-					RES_DATA[RES_LEN-1] = CheckBCC(RES_LEN, RES_DATA);
-												
-					SendAckData(RES_LEN,RES_DATA);
-					
-				
-				} else if( CheckAuth ==0 ){//è®¾å¤‡ç™»é™†è®¤è¯
-					
-						unsigned char j=0;
-							U8 xdata RES_DATA[65]= {0};
-							unsigned char RES_LEN= 65;
-							
-							RES_DATA[0] = 0X23;//æ•°æ®å¤´
-							RES_DATA[1] = 0X23;
-							RES_DATA[2] = 0X10;//å‘½ä»¤æ ‡è¯†  ä¸‹å‘0x8006  å¯¹äºçš„ä¸Šä¼ æ˜¯0x1006
-							RES_DATA[3] = 0X01;
-							RES_DATA[4] = 0xFE;//åº”ç­”æ ‡è¯†
-								
-						 for(j=0;j<17;j++){//CIDèµ‹å€¼
-								RES_DATA[j+5] = SRCCID[j];
-						 }
-						 
-						RES_DATA[22] = 0X01;//ä¸åŠ å¯†
-						RES_DATA[23] = 0X00;//é•¿åº¦ä¸¤ä½ é«˜ä½00
-						RES_DATA[24] = 0X27;//ä½ä½0x27 
-
-						for(j=0;j<6;j++){//Timestamp
-								RES_DATA[j+25] = Timestamp[j];
-						 }
-					
-						
-						RES_DATA[31] = 0X01;//ç™»é™†è®¤è¯
-
-						for(j=0;j<32;j++){//openid
-								RES_DATA[j+32] = SRCOPENID[j];
-						 }
-					
-					RES_DATA[RES_LEN-1] = CheckBCC(RES_LEN, RES_DATA);
-												
-					SendAckData(RES_LEN,RES_DATA);
-					
-					
-				}else {
-					
-					
-				}
-
-		
-		
-		
-	}else{
-		 DisplayTime_Count++;//æ¯åŠ ä¸€æ¬¡åŠ 50ms
-	}
-			
-				if(Timer4_Count>=200){  //200 * 50ms = 10s
-							unsigned char j=0;
-							U8 xdata RES_DATA[37]= {0};
-							unsigned char RES_LEN= 37;
-							unsigned char  light_status = (LED==1) ? 0x01 : 0x02;    //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
-							unsigned char buzzy_status = (Buzzer==1) ? 0x01 : 0x02;  //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
-							Timer4_Count = 0;
-	
-							RES_DATA[0] = 0X23;//æ•°æ®å¤´
-							RES_DATA[1] = 0X23;
-							RES_DATA[2] = 0X10;//å‘½ä»¤æ ‡è¯†  ä¸‹å‘0x8006  å¯¹äºçš„ä¸Šä¼ æ˜¯0x1006
-							RES_DATA[3] = 0X06;
-							RES_DATA[4] = 0xFE;//åº”ç­”æ ‡è¯†
-								
-						 for(j=0;j<17;j++){//CIDèµ‹å€¼
-								RES_DATA[j+5] = SRCCID[j];
-						 }
-						 
-						RES_DATA[22] = 0X01;//ä¸åŠ å¯†
-						RES_DATA[23] = 0X00;//é•¿åº¦ä¸¤ä½ é«˜ä½00
-						RES_DATA[24] = 0X0B;//ä½ä½0B ä¸€å…±11ä½
-
-						RES_DATA[25] = Timestamp[0];//å¹´ 0x14+2000 = 2020 
-						RES_DATA[26] = Timestamp[1];//æœˆ 
-						RES_DATA[27] = Timestamp[2];//æ—¥ 
-						RES_DATA[28] = Timestamp[3];//æ—¶ 
-						RES_DATA[29] = Timestamp[4];//åˆ†
-						RES_DATA[30] = Timestamp[5];//ç§’
-						
-						RES_DATA[31] = 0X02;//åŸºç¡€æ•°æ®ä¸ŠæŠ¥
-
-					RES_DATA[32] = DATA_Temphui[0];
-					RES_DATA[33] = 	DATA_Temphui[1];
-					RES_DATA[34] = light_status;
-					RES_DATA[35] = buzzy_status,
-					RES_DATA[RES_LEN-1] = CheckBCC(RES_LEN, RES_DATA);
-							
-					Timeout_Count++;//æ¯åŠ ä¸€æ¬¡åŠ 10s
-					
-					if(Timeout_Count < 3 && CheckTime==1 && CheckAuth ==1){ //æ²¡æœ‰è®¤è¯æˆåŠŸå‘äº†æœåŠ¡å™¨ä¹Ÿä¼šæ‹’ç»
-						
-						SendAckData(RES_LEN,RES_DATA);
-				}else if(Timeout_Count >= 3){//30sè¿˜æ˜¯æ”¶ä¸åˆ°æœåŠ¡å™¨è¿”å›çš„æ•°æ®ï¼Œåˆ™ é‡å¯æœºå™¨
-						
-						ReConnectServer();
-						Timeout_Count = 0;
-						
-								//é‡æ–°è®¤è¯
-								CheckTime = 0;
-								CheckAuth = 0;
-								OLED_ShowString(0,7,"Closed          ",8);//connected closed starting
-
-					}
-					
-				}else{
-					
-						Timer4_Count++;
-				}
-				
-
-		
+	AUXR &= 0x7F;		//¶¨Ê±Æ÷Ê±ÖÓ12TÄ£Ê½
+	TMOD &= 0xF0;		//ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+	TMOD |= 0x01;		//ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+	TL0 = 0x00;		//ÉèÖÃ¶¨Ê±³õÖµ
+	TH0 = 0xB8;		//ÉèÖÃ¶¨Ê±³õÖµ
+	TF0 = 0;		//Çå³ıTF0±êÖ¾
+	TR0 = 1;		//¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
+	ET0 = 1;	//ÔÊĞíÖĞ¶Ï
 }
 
 
 
-
-
-void Timer0Init(void)		//10æ¯«ç§’@11.0592MHz
-{
-	AUXR &= 0x7F;		//å®šæ—¶å™¨æ—¶é’Ÿ12Tæ¨¡å¼
-	TMOD &= 0xF0;		//è®¾ç½®å®šæ—¶å™¨æ¨¡å¼
-	TMOD |= 0x01;		//è®¾ç½®å®šæ—¶å™¨æ¨¡å¼
-	TL0 = 0x00;		//è®¾ç½®å®šæ—¶åˆå€¼
-	TH0 = 0xB8;		//è®¾ç½®å®šæ—¶åˆå€¼
-	TF0 = 0;		//æ¸…é™¤TF0æ ‡å¿—
-	TR0 = 1;		//å®šæ—¶å™¨0å¼€å§‹è®¡æ—¶
-	ET0 = 1;	//å…è®¸ä¸­æ–­
-}
-
-
-
-/********************* Timer0ä¸­æ–­å‡½æ•°************************/
+/********************* Timer0ÖĞ¶Ïº¯Êı************************/
 void timer0_int (void) interrupt 1
 {
-	TL0 = 0x00;		//è®¾ç½®å®šæ—¶åˆå€¼
-	TH0 = 0xB8;		//è®¾ç½®å®šæ—¶åˆå€¼
-	TF0 = 0;		//æ¸…é™¤TF0æ ‡å¿—
-	TR0 = 0;		//å®šæ—¶å™¨0å¼€å§‹è®¡æ—¶
-	ET0 = 0;	//å…è®¸ä¸­æ–­
+	TL0 = 0x00;		//ÉèÖÃ¶¨Ê±³õÖµ
+	TH0 = 0xB8;		//ÉèÖÃ¶¨Ê±³õÖµ
+	TF0 = 0;		//Çå³ıTF0±êÖ¾
+	TR0 = 0;		//¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
+	ET0 = 0;	//ÔÊĞíÖĞ¶Ï
 	
-	ResponseData(CURRENT_LENGTH,DATA_GET);		
-	CURRENT_LENGTH = 0;
-			
+	CloudHandleReceive();
+	RX1_Cnt = 0;
 }
 
 
-void Led_Actions_Status(unsigned char status){  //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
+void Led_Actions_Status(unsigned char status){  //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
 
 	if(status){
 		LED = 1;
@@ -869,7 +464,7 @@ void Led_Actions_Status(unsigned char status){  //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
 
 }
 
-void Buzzer_Actions_Status(unsigned char status){ //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
+void Buzzer_Actions_Status(unsigned char status){ //0ÊÇ¿ªÆô 1ÊÇ¹Ø±Õ
 
 	if(status){
 		Buzzer = 1;
@@ -878,3 +473,444 @@ void Buzzer_Actions_Status(unsigned char status){ //0æ˜¯å¼€å¯ 1æ˜¯å…³é—­
 	}
 
 }
+
+/******************************  ÖÇÄÜÒ»¼üÅäÍøÄ£Ê½  *****************************/
+void ESP8266_SmartConnect(void)
+{
+	
+	u8 status= 1;
+	DeviceStatus = 1;
+	while(status==1)
+	{
+			OLED_ShowString(0,7,"AT              ",8);
+			memset(RX1_Buffer,0,450);RX1_Cnt = 0;
+			UART_TC("AT\r\n\0"); 
+		  DELAY_MS(500);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{	
+				status=2;
+				DeviceStatus = 2;
+
+        RX1_Cnt = 0;
+				memset(RX1_Buffer,0,450);
+			}
+			else
+			{
+				Enter_ErrorMode(1);
+			}
+	}	
+	while(status==2)
+	{
+				OLED_ShowString(0,7,"CWMODE          ",8);
+
+				UART_TC("AT+CWMODE=1\r\n\0");DELAY_MS(500);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{	
+				//PrintString1("\Ä£Ê½Ñ¡Ôñ³É¹¦\r\n" );
+				//PrintString1(RX1_Buffer);
+				RX1_Cnt = 0;
+				memset(RX1_Buffer,0,450);
+				status=3;
+				DeviceStatus = 3;
+
+			}
+			else
+			{
+				status=2;
+				Enter_ErrorMode(2);
+
+			}
+	}
+	if(status==3)//ÅäÖÃWiFiÄ£×é¹¤×÷Ä£Ê½Îªµ¥STAÄ£Ê½£¬²¢°ÑÅäÖÃ±£´æÔÚflash
+	{
+				OLED_ShowString(0,7,"CWJAP           ",8);
+			sprintf(mqtt_message,"AT+CWJAP=\"%s\",\"%s\"\r\n\0",WiFiName,WiFiPassword);
+			UART_TC(mqtt_message);
+			memset(mqtt_message,0,256);
+			DELAY_MS(4000);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{	
+				status=4;
+				DeviceStatus = 4;
+				//UART_TC("\rÖØĞÂÁªÍø³É¹¦SUCCESS\r\n\0" );
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}
+			else
+			{
+				//UART_TC("\rÖØĞÂÁªÍøFAIL\r\n\0" );
+				status=1;
+				Enter_ErrorMode(3);
+			}
+			
+	}
+	
+	while(status==4)
+	{
+		
+			OLED_ShowString(0,7,"MQTTUSERCFG     ",8);
+
+			UART_TC("AT+MQTTUSERCFG=0,1,\"\",\"\",\"\",0,0,\"\"\r\n\0"); 
+			memset(mqtt_message,0,256);
+			DELAY_MS(2000);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{	
+				status=5;
+								DeviceStatus = 5;
+
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}
+			else
+			{
+				status=1;
+				Enter_ErrorMode(4);
+			}
+	}
+	while(status==5)//ÅäÖÃWiFiÄ£×é¹¤×÷Ä£Ê½Îªµ¥STAÄ£Ê½£¬²¢°ÑÅäÖÃ±£´æÔÚflash
+	{
+			OLED_ShowString(0,7,"MQTTUSERNAME    ",8);
+
+			sprintf(mqtt_message,"AT+MQTTUSERNAME=0,\"%s\"\r\n\0",DName);
+			UART_TC(mqtt_message);
+			memset(mqtt_message,0,256);
+			DELAY_MS(1000);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{	
+				status=6;
+				DeviceStatus = 6;
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}	
+			else
+			{
+				status=1;
+				Enter_ErrorMode(5);
+			}
+	}
+	while(status==6)
+	{
+			OLED_ShowString(0,7,"MQTTPASSWORD    ",8);
+
+		  sprintf(mqtt_message,"AT+MQTTPASSWORD=0,\"%s\"\r\n\0",DPassWord);
+		  UART_TC(mqtt_message);
+			memset(mqtt_message,0,256);
+			DELAY_MS(1000);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{
+				status=7;
+				DeviceStatus = 7;
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}
+			else 
+			{	
+				status=1;
+				Enter_ErrorMode(6);
+			}
+	}	
+	while(status==7)
+	{
+			OLED_ShowString(0,7,"MQTTCLIENTID    ",8);
+
+			sprintf(mqtt_message,"AT+MQTTCLIENTID=0,\"%s\"\r\n\0",DClientID);
+			UART_TC(mqtt_message);
+			DELAY_MS(2000);
+			memset(mqtt_message,0,256);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{	
+				status=8;
+				DeviceStatus = 8;
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}
+			else 
+			{			
+				status=1;
+				Enter_ErrorMode(7);
+			}
+	}
+	while(status==8)
+	{
+			OLED_ShowString(0,7,"MQTTCONN        ",8);
+			sprintf(mqtt_message,"AT+MQTTCONN=0,\"%s\",%d,1\r\n\0",mqttHostUrl,port);
+			UART_TC(mqtt_message);
+			DELAY_MS(2000);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{	
+				status=9;
+				DeviceStatus = 9;
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}
+			else 
+			{			
+				status=1;
+				Enter_ErrorMode(8);
+			}
+	}
+	if(status==9)
+	{
+			OLED_ShowString(0,7,"MQTTSUB         ",8);
+			sprintf(mqtt_message,"AT+MQTTSUB=0,\"%s\",0\r\n\0",DSubTopic);
+			UART_TC(mqtt_message);
+			memset(mqtt_message,0,256);
+			//UART_TC("AT+MQTTSUB=0,\"/sub/\",1883,0\r\n\0");
+			DELAY_MS(2000);
+			if(strstr(RX1_Buffer,"OK")!=NULL)
+			{
+				DeviceStatus = 0;
+				OLED_ShowString(0,7,"OK              ",8);
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+			}
+			else 
+			{
+				status=1;
+				Enter_ErrorMode(9);
+			}
+			
+		  AutoSendMsgFlag=1;
+		
+
+	}
+}
+
+/******************************  ½øÈë´íÎóÄ£Ê½´úÂë  *****************************/
+
+//½øÈë´íÎóÄ£Ê½µÈ´ıÊÖ¶¯ÖØÆô
+void Enter_ErrorMode(u8 mode)
+{
+		switch(mode){
+			case 0:	
+					OLED_ShowString(0,7,"OK              ",8);
+					break;
+			case 1:	
+					OLED_ShowString(0,7,"E1 AT           ",8);
+					break;
+			case 2:
+					OLED_ShowString(0,7,"E2 CWMODE       ",8);
+					break;
+			case 3:		
+					OLED_ShowString(0,7,"E3 CWJAP        ",8);
+					 ReConnectServer();DELAY_MS(1500);ESP8266_SmartConnect();
+					break;
+			case 4:	
+					OLED_ShowString(0,7,"E4 MQTTUSERCFG  ",8);
+					break;
+			case 5:	
+					OLED_ShowString(0,7,"E5 MQTTUSERNAME ",8);
+					break;
+			case 6:	
+					OLED_ShowString(0,7,"E6 MQTTPASSWORD ",8);
+					break;
+			case 7:
+					OLED_ShowString(0,7,"E7 MQTTCLIENTID ",8);
+			    ReConnectServer();DELAY_MS(1500);ESP8266_SmartConnect();
+					break;
+			case 8:
+			    OLED_ShowString(0,7,"E8 MQTTCONN     ",8);
+			    ReConnectServer();DELAY_MS(1500);ESP8266_SmartConnect();
+					break;
+			case 9:
+			    OLED_ShowString(0,7,"E9 MQTTSUB      ",8);
+			    ReConnectServer();DELAY_MS(1500);ESP8266_SmartConnect();
+					break;
+			default:
+					OLED_ShowString(0,7,"EE              ",8);
+					ReConnectServer();DELAY_MS(1500);ESP8266_SmartConnect();
+
+			break;
+		}		
+}
+
+void CloudHandleReceive(void)
+{
+	
+
+    if (strncmp(RX1_Buffer, "ERROR", 5) == 0) //ÃüÁîÖ´ĞĞÒì³£
+    {
+        //Ä¿Ç°²»´¦Àí,´ıÍêÉÆ
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+    }
+    else if (strncmp(RX1_Buffer, "OK", 2) == 0) //ÃüÁîÖ´ĞĞÕı³£
+    {
+				memset(RX1_Buffer,0,450);
+				RX1_Cnt = 0;
+    }
+    else if (RX1_Buffer[0] == '+') //¶ÁÈ¡ÏêÏ¸ĞÅÏ¢
+    {
+			
+
+						if (strncmp(RX1_Buffer + 1, "MQTTSUBRECV", 11) == 0) //ÊÕµ½¶©ÔÄĞÅÏ¢
+						{
+
+								pdata U8 *P=RX1_Buffer;//´ÓÕâÀï¿ªÊ¼²éÕÒ³¤¶È
+								pdata U8 name[20],i=0;
+								pdata U8 reporttime[16];
+							  memset(name,0,20);
+							  memset(reporttime,0,16);
+							  i=0;
+					      
+							
+							//Æ¥ÅäµÚÒ»´Î³öÏÖµÄµØÖ·  ×´Ì¬²éÑ¯
+								P=strstr(P,"\"cmdtype\":\"cmd_status\"");
+										
+							  if(P != NULL){
+												sprintf(mqtt_message,"AT+MQTTPUB=0,\"%s\",\"{\\\"status\\\":\\\"success\\\"\\\,\\\"cmdtype\\\":\\\"cmd_controllack\\\"\\\,\\\"did\\\":\\\"%s\\\"\\\,\\\"cid\\\":\\\"%s\\\"\\\,\\\"version\\\":\\\"%s\\\"}\",0,0\r\n\0",DPubTopic,Ddid,DCID,Dversion);
+			                    UART_TC(mqtt_message);
+													
+													AutoSendMsgFlag = 1;
+
+								}
+							
+							
+								i=0;
+								P=RX1_Buffer;
+
+								
+							 //Æ¥ÅäµÚÒ»´Î³öÏÖµÄµØÖ·  ÏÔÊ¾·µ»ØµÄÊ±¼ä´Á
+								P=strstr(P,"\"reporttime\":\"");
+										
+							  if(P != NULL){
+											P+=14;
+                      while(*P != '"'&&i!=16)
+												reporttime[i++]=*P++;										
+			            OLED_ShowString(0,0,reporttime,16);
+
+								}
+							
+							
+								i=0;
+								P=RX1_Buffer;
+
+								//Æ¥ÅäµÚÒ»´Î³öÏÖµÄµØÖ·  Æ¥ÅäÔ¶¿ØÖ¸Áî
+								P=strstr(P,"\"sensorname\":\"");
+								
+								//Ã»ÓĞÆ¥Åäµ½Ô¶¿ØÖ¸Áî
+							  if(P == NULL){
+
+										memset(RX1_Buffer,0,450);
+										RX1_Cnt = 0;
+										memset(name,0,20);
+										i=0;
+									
+								//Æ¥Åäµ½Ô¶¿ØÖ¸Áî
+								}else{
+									
+											P+=14;
+											//Ô¶¿ØÖ¸ÁîÃû³Æ
+											while(*P != '"'&&i!=19)
+												name[i++]=*P++;
+											name[i]=0;
+										//×´Ì¬²éÑ¯
+										if(strncmp(name,"status",6) == 0){
+												memset(name,0,20);
+												i=0;
+												
+												P=RX1_Buffer;
+												P=strstr(P,"\"sensorcmd\":\""),P+=13;
+												
+												while(*P != '"'&&i!=19)
+													name[i++]=*P++;
+												name[i]=0;
+												
+												if(strncmp(name,"open",4) == 0){
+													
+												}else if(strncmp(name,"close",5) == 0){
+												
+												}else{}
+												
+													sprintf(mqtt_message,"AT+MQTTPUB=0,\"%s\",\"{\\\"status\\\":\\\"success\\\"\\\,\\\"cmdtype\\\":\\\"cmd_controllack\\\"\\\,\\\"did\\\":\\\"%s\\\"\\\,\\\"cid\\\":\\\"%s\\\"\\\,\\\"version\\\":\\\"%s\\\"}\",0,0\r\n\0",DPubTopic,Ddid,DCID,Dversion);
+			                    UART_TC(mqtt_message);
+													AutoSendMsgFlag = 1;
+											}	
+										//ÖØÆô
+											else if(strncmp(name,"restart",7) == 0){
+											
+													sprintf(mqtt_message,"AT+MQTTPUB=0,\"%s\",\"{\\\"status\\\":\\\"success\\\"\\\,\\\"cmdtype\\\":\\\"cmd_controllack\\\"\\\,\\\"did\\\":\\\"%s\\\"\\\,\\\"cid\\\":\\\"%s\\\"\\\,\\\"version\\\":\\\"%s\\\"}\",0,0\r\n\0",DPubTopic,Ddid,DCID,Dversion);
+			                    UART_TC(mqtt_message);
+												
+													IAP_CONTR = 0X20;
+											}	
+											//µÆ
+											else if(strncmp(name,"led",3) == 0){
+												memset(name,0,20);
+												i=0;
+												
+												P=RX1_Buffer;
+												P=strstr(P,"\"sensorcmd\":\""),P+=13;
+												
+												while(*P != '"'&&i!=19)
+													name[i++]=*P++;
+												name[i]=0;
+												
+												if(strncmp(name,"open",4) == 0){
+													Led_Actions_Status(0);
+												}else if(strncmp(name,"close",5) == 0){
+													Led_Actions_Status(1);
+												}else{}
+												
+													sprintf(mqtt_message,"AT+MQTTPUB=0,\"%s\",\"{\\\"status\\\":\\\"success\\\"\\\,\\\"cmdtype\\\":\\\"cmd_controllack\\\"\\\,\\\"did\\\":\\\"%s\\\"\\\,\\\"cid\\\":\\\"%s\\\"\\\,\\\"version\\\":\\\"%s\\\"}\",0,0\r\n\0",DPubTopic,Ddid,DCID,Dversion);
+			                    UART_TC(mqtt_message);
+													AutoSendMsgFlag = 1;
+											}	
+											//¸æ¾¯
+											else if(strncmp(name,"alarm",5) == 0){
+
+												memset(name,0,20);
+
+												P=RX1_Buffer;
+												P=strstr(P,"\"sensorcmd\":\""),P+=13;
+												i=0;
+												while(*P != '"'&&i!=19)
+													name[i++]=*P++;
+												name[i]=0;
+												
+												if(strncmp(name,"open",4) == 0){
+													
+													Buzzer_Actions_Status(0);
+
+												}else if(strncmp(name,"close",5) == 0){
+													Buzzer_Actions_Status(1);
+
+												}else{
+												
+												}
+											  sprintf(mqtt_message,"AT+MQTTPUB=0,\"%s\",\"{\\\"status\\\":\\\"success\\\"\\\,\\\"cmdtype\\\":\\\"cmd_controllack\\\"\\\,\\\"did\\\":\\\"%s\\\"\\\,\\\"cid\\\":\\\"%s\\\"\\\,\\\"version\\\":\\\"%s\\\"}\",0,0\r\n\0",DPubTopic,Ddid,DCID,Dversion);
+			                  UART_TC(mqtt_message);
+												
+												AutoSendMsgFlag = 1;
+
+
+											}	
+												
+										
+								
+								
+								
+								
+								}
+
+							memset(RX1_Buffer,0,450);
+							RX1_Cnt = 0;
+							
+
+								
+						}
+						
+						
+						RX1_Cnt = 0;
+
+			
+						
+        
+    }
+    else //¶ÁÈ¡¸½¼ÓĞÅÏ¢
+    {
+        //Ä¿Ç°ÓÃ²»µ½
+    }
+}
+
+

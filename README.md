@@ -1,6 +1,10 @@
 # FairyCloud_STC15BD_PUBLIC
 STC15物联网核心板-硬件代码;欢迎交流：QQ群：630017549，个人微信：fairycloud2035
 
+
+【MQTT版本】STC15核心板代码，实现MQTT连接平台，支持小程序远程查看温度、湿度、灯、蜂鸣器状态，以及远程控制灯和蜂鸣器；
+
+
 ## 代码说明
 ### 代码目录
 FairyCloud_STC15BD_PUBLIC/code/
@@ -11,22 +15,37 @@ FairyCloud_STC15BD_PUBLIC/code/config.h
 
 
 ### 配置文件说明
-1.你的设备CID，17位设备编码
+需要修改配置的地方如下：目录在code/config.h
 
-unsigned char SRCCID[] = {"SXXXXXXXXXXXXXXXX"};
+----------------WIFI热点名称及密码------------------------
+//WiFi名称
+#define WiFiName "XXXXXXXXXXX"
+//WiFi密码
+#define WiFiPassword "XXXXXXXXXXX"
 
-2.填写你的WiFi名称和密码，示例的WiFi名称 Fariy    密码 qwerty123
+----------------精灵物联网参数------------------------
+//MQTT地址
+#define mqttHostUrl "XXXXXXXXXXX"
+//MQTT端口
+#define port 1883
+//设备CID
+#define DCID "SRCTDSPWU000000XX"
+//MQTT name
+#define DName "SRCTDSPWU000000XX&STC15DB"
+//MQTTclientid---一定注意，中间的逗号前面，自己加两个斜杠！！！
+#define DClientID "16731950792|securemode=2\,signmethod=hmacsha256\,timestamp=1723389081212|"
+//MQTT密码
+#define DPassWord "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+//MQTT订阅主题
+#define DSubTopic "server/home/SRCTDSPWU000000XX"
+//MQTT发布主题
+#define DPubTopic "client/home/SRCTDSPWU000000XX"
 
-unsigned char netConfig[] = "AT+CWJAP=\"Fariy\",\"qwerty123\"\r\n\0";
 
-3.填写32位openid，平台管理员直接提供给你！
+### 运行
 
-unsigned char SRCOPENID[] = {"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
+第一次运行大约17s左右，设备登录到平台
 
-4.填写服务器的IP和端口，平台管理员直接提供给你！
-
-unsigned char TcpServer[] = "AT+CIPSTART=\"TCP\",\"xxxxxxxxxxxxxxxxx\",xxxxx\r\n\0";
-unsigned char SaveTcpServer[] = "AT+SAVETRANSLINK=1,\"xxxxxxxxxxxxxxxxx\",xxxxx,\"TCP\"\r\n\0";
 
 
 ## 示例教程
